@@ -107,7 +107,7 @@ The project needs four types of contributor:
 
 **Evaluation designers** — researchers interested in benchmark methodology, scoring design, or automated evaluation.
 
-If any of these fit, open an issue or email `[your contact]`.
+If any of these fit, open an issue or email `abdulhakim.gafai@gmail.com`.
 
 ---
 
@@ -117,7 +117,7 @@ If any of these fit, open an issue or email `[your contact]`.
 @misc{adminbench-uk-2025,
   title  = {AdminBench-UK: A Benchmark for Policy-Constrained, Document-Grounded
             AI Agent Evaluation on UK Business Administration Tasks},
-  author = {[Your name]},
+  author = {Abdulhakim Bashir},
   year   = {2025},
   url    = {https://github.com/babdulhakim2/adminbench-uk}
 }
