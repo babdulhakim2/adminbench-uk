@@ -43,6 +43,8 @@ Each task gives an agent:
 - A portal environment built on the [GOV.UK Frontend](https://github.com/alphagov/govuk-frontend) component library, running in Docker
 - A mock CRM and audit log
 
+Task definitions for the current benchmark set live in [`tasks/v0.1.yaml`](tasks/v0.1.yaml).
+
 The agent must complete the task correctly, using the right evidence, following the applicable policy, and stopping for human approval before any final submission.
 
 Tasks are scored across seven dimensions:
