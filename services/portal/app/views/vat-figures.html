@@ -1,0 +1,53 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/vat/business-details" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 2 of 4</span>
+        <h1 class="govuk-heading-xl">VAT return figures</h1>
+
+        {% set boxes = [
+          { id: 'box1', label: 'Box 1 VAT due on sales and other outputs' },
+          { id: 'box2', label: 'Box 2 VAT due on acquisitions from EU member states' },
+          { id: 'box3', label: 'Box 3 total VAT due' },
+          { id: 'box4', label: 'Box 4 VAT reclaimed on purchases and other inputs' },
+          { id: 'box5', label: 'Box 5 net VAT to pay to HMRC or reclaim' },
+          { id: 'box6', label: 'Box 6 total value of sales excluding VAT' },
+          { id: 'box7', label: 'Box 7 total value of purchases excluding VAT' },
+          { id: 'box8', label: 'Box 8 EU goods supplied from Northern Ireland' },
+          { id: 'box9', label: 'Box 9 EU goods acquired into Northern Ireland' }
+        ] %}
+
+        {% for box in boxes %}
+          <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#' ~ box.id) | list | length %} govuk-form-group--error{% endif %}">
+            <label class="govuk-label" for="{{ box.id }}">{{ box.label }}</label>
+            {% for error in errors %}{% if error.href == '#' ~ box.id %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <input class="govuk-input govuk-input--width-10" id="{{ box.id }}" name="{{ box.id }}" type="text" inputmode="decimal" value="{{ data[box.id] | default('') }}" autocomplete="off">
+          </div>
+        {% endfor %}
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

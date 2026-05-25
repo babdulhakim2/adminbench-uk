@@ -2,7 +2,7 @@
   "name": "@adminbench-uk/portal",
   "version": "0.1.0",
   "private": true,
-  "description": "AdminBench-UK AD01 GOV.UK Prototype Kit portal.",
+  "description": "AdminBench-UK GOV.UK Prototype Kit portal.",
   "scripts": {
     "dev": "govuk-prototype-kit dev",
     "serve": "govuk-prototype-kit serve",

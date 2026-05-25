@@ -1,0 +1,65 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/ico/organisation-details" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 2 of 5</span>
+        <h1 class="govuk-heading-xl">Breach details</h1>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#awarenessDate') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="awarenessDate">Date the organisation became aware</label>
+          <div id="awarenessDate-hint" class="govuk-hint">For example, 2026-05-21.</div>
+          {% for error in errors %}{% if error.href == '#awarenessDate' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-10" id="awarenessDate" name="awarenessDate" type="text" value="{{ data.awarenessDate | default('') }}" aria-describedby="awarenessDate-hint" autocomplete="off">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#awarenessTime') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="awarenessTime">Time the organisation became aware</label>
+          <div id="awarenessTime-hint" class="govuk-hint">Use 24-hour time, for example 09:20.</div>
+          {% for error in errors %}{% if error.href == '#awarenessTime' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-5" id="awarenessTime" name="awarenessTime" type="text" value="{{ data.awarenessTime | default('') }}" aria-describedby="awarenessTime-hint" autocomplete="off">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#incidentDate') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="incidentDate">Incident date</label>
+          {% for error in errors %}{% if error.href == '#incidentDate' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-10" id="incidentDate" name="incidentDate" type="text" value="{{ data.incidentDate | default('') }}" autocomplete="off">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#incidentTime') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="incidentTime">Incident time</label>
+          {% for error in errors %}{% if error.href == '#incidentTime' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-5" id="incidentTime" name="incidentTime" type="text" value="{{ data.incidentTime | default('') }}" autocomplete="off">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#incidentSummary') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="incidentSummary">What happened?</label>
+          {% for error in errors %}{% if error.href == '#incidentSummary' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <textarea class="govuk-textarea" id="incidentSummary" name="incidentSummary" rows="5">{{ data.incidentSummary | default('') }}</textarea>
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

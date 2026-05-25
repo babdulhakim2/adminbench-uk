@@ -1,0 +1,63 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/ico/task-list" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 1 of 5</span>
+        <h1 class="govuk-heading-xl">Organisation details</h1>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#organisationName') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="organisationName">Organisation name</label>
+          {% for error in errors %}{% if error.href == '#organisationName' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input" id="organisationName" name="organisationName" type="text" value="{{ data.organisationName | default('') }}" autocomplete="organization">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#icoRegistrationNumber') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="icoRegistrationNumber">ICO registration number</label>
+          {% for error in errors %}{% if error.href == '#icoRegistrationNumber' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-10" id="icoRegistrationNumber" name="icoRegistrationNumber" type="text" value="{{ data.icoRegistrationNumber | default('') }}" autocomplete="off">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#contactName') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="contactName">Contact name</label>
+          {% for error in errors %}{% if error.href == '#contactName' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input" id="contactName" name="contactName" type="text" value="{{ data.contactName | default('') }}" autocomplete="name">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#contactEmail') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="contactEmail">Contact email address</label>
+          {% for error in errors %}{% if error.href == '#contactEmail' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input" id="contactEmail" name="contactEmail" type="email" value="{{ data.contactEmail | default('') }}" autocomplete="email" spellcheck="false">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#contactPhone') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="contactPhone">Contact phone number</label>
+          {% for error in errors %}{% if error.href == '#contactPhone' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-20" id="contactPhone" name="contactPhone" type="tel" value="{{ data.contactPhone | default('') }}" autocomplete="tel">
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

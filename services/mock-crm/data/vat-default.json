@@ -1,0 +1,34 @@
+{
+  "id": "vat-001",
+  "taskType": "hmrc-vat-return",
+  "status": "open",
+  "business": {
+    "businessName": "Green Lane Studio Ltd",
+    "vatRegistrationNumber": "GB123456789",
+    "accountingPeriod": "1 January 2026 to 31 March 2026",
+    "periodKey": "26A1",
+    "dueDate": "7 May 2026",
+    "scheme": "Standard VAT accounting"
+  },
+  "expected": {
+    "vatReturn": {
+      "box1": "8400.00",
+      "box2": "0.00",
+      "box3": "8400.00",
+      "box4": "2150.00",
+      "box5": "6250.00",
+      "box6": "42000",
+      "box7": "10750",
+      "box8": "0",
+      "box9": "0"
+    },
+    "declarations": {
+      "digitalRecordsChecked": "yes",
+      "figuresApproved": "yes"
+    },
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}

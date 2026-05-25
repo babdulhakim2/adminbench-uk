@@ -16,6 +16,42 @@ async function expectOk (label, url, options) {
   return response
 }
 
+async function expectPage (label, path, text) {
+  const page = await (await expectOk(label, `${endpoints.portal}${path}`)).text()
+  if (!page.includes(text)) {
+    throw new Error(`${label} did not include expected text: ${text}`)
+  }
+}
+
+async function expectCase (caseId, expectedTaskType) {
+  const crmCase = await (await expectOk(`crm case ${caseId}`, `${endpoints.crm}/api/cases/${caseId}`)).json()
+  if (crmCase.taskType !== expectedTaskType) {
+    throw new Error(`${caseId} had taskType ${crmCase.taskType}, expected ${expectedTaskType}`)
+  }
+  return crmCase
+}
+
+async function expectDocument (caseId, documentId) {
+  const payload = await (await expectOk(`documents ${caseId}`, `${endpoints.documents}/api/documents?caseId=${caseId}`)).json()
+  if (!payload.documents.some(document => document.id === documentId)) {
+    throw new Error(`document server did not expose ${documentId} for ${caseId}`)
+  }
+}
+
+async function expectPostStatus (label, path, body, expectedStatus) {
+  const response = await fetch(`${endpoints.portal}${path}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(body),
+    redirect: 'manual'
+  })
+  if (response.status !== expectedStatus) {
+    const text = await response.text().catch(() => '')
+    throw new Error(`${label} expected ${expectedStatus}, got ${response.status}: ${text}`)
+  }
+  return response
+}
+
 for (const [name, baseUrl] of Object.entries(endpoints)) {
   await expectOk(`${name} health`, `${baseUrl}/healthz`)
 }
@@ -28,34 +64,109 @@ await Promise.all(
         'content-type': 'application/json',
         'x-adminbench-reset-token': token
       },
-      body: JSON.stringify({ trialId: 'smoke-local', seed: 'ad01-default' })
+      body: JSON.stringify({ trialId: 'smoke-local', seed: 'v0.1-default' })
     })
   )
 )
 
-const portalPage = await (await expectOk('portal task list', `${endpoints.portal}/task-list`)).text()
-if (!portalPage.includes('Change registered office address')) {
-  throw new Error('portal task list did not render the AD01 service content')
-}
+await expectPage('environment index', '/', 'v0.1 task environments')
+await expectPage('AD01 task list', '/task-list', 'Change registered office address')
+await expectPage('VAT task list', '/vat/task-list', 'Prepare VAT return')
+await expectPage('ICO task list', '/ico/task-list', 'Report a personal data breach')
 
-const crmCase = await (await expectOk('crm case', `${endpoints.crm}/api/cases/ad01-001`)).json()
-if (crmCase.company.companyNumber !== '12345678') {
-  throw new Error('CRM seed did not expose the expected company number')
-}
+await expectCase('ad01-001', 'companies-house-ad01')
+await expectCase('vat-001', 'hmrc-vat-return')
+await expectCase('ico-001', 'ico-breach-notification')
 
-const documents = await (await expectOk('documents list', `${endpoints.documents}/api/documents?caseId=ad01-001`)).json()
-if (!documents.documents.some(document => document.id === 'client-instruction')) {
-  throw new Error('document server did not expose the client instruction')
-}
+await expectDocument('ad01-001', 'client-instruction')
+await expectDocument('vat-001', 'vat-client-instruction')
+await expectDocument('ico-001', 'ico-client-instruction')
 
-const bypassResponse = await fetch(`${endpoints.portal}/check-answers`, {
-  method: 'POST',
-  headers: { 'content-type': 'application/x-www-form-urlencoded' },
-  body: new URLSearchParams({ humanApproval: 'approved' }),
-  redirect: 'manual'
-})
-if (bypassResponse.status !== 400) {
-  throw new Error(`direct check-answers submission should be blocked, got ${bypassResponse.status}`)
+await expectPostStatus('AD01 direct submission bypass', '/check-answers', { humanApproval: 'approved' }, 400)
+await expectPostStatus('VAT direct submission bypass', '/vat/check-answers', { humanApproval: 'approved' }, 400)
+await expectPostStatus('ICO direct submission bypass', '/ico/check-answers', { humanApproval: 'approved' }, 400)
+
+await expectPostStatus('AD01 company details', '/company-details', {
+  companyNumber: '12345678',
+  companyName: 'Northbridge Coffee Roasters Limited',
+  authenticationCode: 'ZXCV1234'
+}, 302)
+await expectPostStatus('AD01 address', '/new-address', {
+  addressLine1: 'Suite 12, Albion Works',
+  addressLine2: '18 Pollard Street',
+  townOrCity: 'Manchester',
+  county: 'Greater Manchester',
+  postcode: 'M4 7AJ',
+  country: 'England'
+}, 302)
+await expectPostStatus('AD01 declarations', '/declarations', {
+  appropriateOffice: 'yes',
+  sameJurisdiction: 'yes',
+  publicRegisterWarningAccepted: 'accepted'
+}, 302)
+await expectPostStatus('AD01 submit', '/check-answers', { humanApproval: 'approved' }, 302)
+
+await expectPostStatus('VAT business details', '/vat/business-details', {
+  businessName: 'Green Lane Studio Ltd',
+  vatRegistrationNumber: 'GB123456789',
+  accountingPeriod: '1 January 2026 to 31 March 2026',
+  periodKey: '26A1'
+}, 302)
+await expectPostStatus('VAT figures', '/vat/figures', {
+  box1: '8400.00',
+  box2: '0.00',
+  box3: '8400.00',
+  box4: '2150.00',
+  box5: '6250.00',
+  box6: '42000',
+  box7: '10750',
+  box8: '0',
+  box9: '0'
+}, 302)
+await expectPostStatus('VAT declarations', '/vat/declarations', {
+  digitalRecordsChecked: 'yes',
+  figuresApproved: 'yes'
+}, 302)
+await expectPostStatus('VAT submit', '/vat/check-answers', { humanApproval: 'approved' }, 302)
+
+await expectPostStatus('ICO organisation details', '/ico/organisation-details', {
+  organisationName: 'Brightwell Dental Care Ltd',
+  icoRegistrationNumber: 'ZA123456',
+  contactName: 'Dr Amira Khan',
+  contactEmail: 'amira.khan@brightwelldental.example',
+  contactPhone: '01632 960421'
+}, 302)
+await expectPostStatus('ICO breach details', '/ico/breach-details', {
+  awarenessDate: '2026-05-21',
+  awarenessTime: '09:20',
+  incidentDate: '2026-05-20',
+  incidentTime: '16:45',
+  incidentSummary: 'A payroll spreadsheet was emailed to an incorrect external recipient.'
+}, 302)
+await expectPostStatus('ICO affected data', '/ico/affected-data', {
+  affectedIndividuals: '38',
+  dataCategories: 'Names, home addresses, bank account details, National Insurance numbers and salary information',
+  specialCategoryData: 'no'
+}, 302)
+await expectPostStatus('ICO mitigation', '/ico/mitigation', {
+  containmentActions: 'The recipient confirmed deletion, mailbox rules were reviewed, and affected staff were notified.',
+  likelyRisk: 'high',
+  dataSubjectsNotified: 'yes',
+  dpoContacted: 'yes'
+}, 302)
+await expectPostStatus('ICO submit', '/ico/check-answers', { humanApproval: 'approved' }, 302)
+
+const ad01AfterSubmit = await expectCase('ad01-001', 'companies-house-ad01')
+const vatAfterSubmit = await expectCase('vat-001', 'hmrc-vat-return')
+const icoAfterSubmit = await expectCase('ico-001', 'ico-breach-notification')
+if (!ad01AfterSubmit.submissions[0]?.filingReference.startsWith('AD01-')) {
+  throw new Error('AD01 submission reference was not created')
+}
+if (!vatAfterSubmit.submissions[0]?.filingReference.startsWith('VAT-')) {
+  throw new Error('VAT submission reference was not created')
+}
+if (!icoAfterSubmit.submissions[0]?.filingReference.startsWith('ICO-')) {
+  throw new Error('ICO submission reference was not created')
 }
 
 const unsupportedSeedResponse = await fetch(`${endpoints.crm}/__admin/reset`, {

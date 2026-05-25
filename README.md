@@ -74,9 +74,15 @@ Results are reported using **pass^k** (reliability across repeated trials), not 
 
 Portal environments run as Docker containers. Each implements a realistic GOV.UK-style multi-page form flow using the official GOV.UK Frontend library (MIT licence). Environments reset to a clean state between trials for reproducible evaluation.
 
-### Run the AD01 environment
+### Run the v0.1 environment stack
 
-The first v0.1 environment is a Companies House AD01 registered office address task.
+v0.1 includes three Dockerised task environments in one GOV.UK-styled portal:
+
+| Environment | Portal URL | Case ID | Seed |
+|---|---|---|---|
+| Companies House AD01 registered office address | `http://localhost:3000/task-list` | `ad01-001` | `ad01-default` |
+| HMRC VAT return | `http://localhost:3000/vat/task-list` | `vat-001` | `vat-default` |
+| ICO personal data breach notification | `http://localhost:3000/ico/task-list` | `ico-001` | `ico-default` |
 
 Start the stack:
 
@@ -88,8 +94,8 @@ Open the services:
 
 | Service | URL | Purpose |
 |---|---|---|
-| Portal | `http://localhost:3000` | GOV.UK Prototype Kit AD01 form |
-| Mock CRM | `http://localhost:4000/api/cases/ad01-001` | Case state, draft updates, submission state |
+| Portal | `http://localhost:3000` | GOV.UK Prototype Kit portal with AD01, VAT, and ICO flows |
+| Mock CRM | `http://localhost:4000/api/cases` | Case state, draft updates, submission state |
 | Audit sink | `http://localhost:4001/events` | Captured portal and agent events |
 | Document server | `http://localhost:4002/documents` | Source documents for the task |
 
@@ -109,14 +115,14 @@ The reset endpoint is `POST /__admin/reset` on every service. It accepts:
 
 ```json
 {
-  "trialId": "ad01-run-001",
-  "seed": "ad01-default"
+  "trialId": "local-run-001",
+  "seed": "v0.1-default"
 }
 ```
 
-Use `RESET_TOKEN` to override the local default reset token. v0.1 currently supports the `ad01-default` seed.
+Use `RESET_TOKEN` to override the local default reset token. The default `v0.1-default` seed loads all three cases. Individual seeds are also available for focused runs: `ad01-default`, `vat-default`, and `ico-default`.
 
-The AD01 flow is: task list, source documents, company details, new registered office address, declarations, check answers, human approval, and simulated submission. The final filing is blocked unless the draft is complete and human approval is confirmed.
+Each flow has source documents, case-specific form steps, check answers, human approval, and a simulated submission. Final submission is blocked unless the draft is complete and human approval is confirmed.
 
 ---
 
@@ -124,7 +130,7 @@ The AD01 flow is: task list, source documents, company details, new registered o
 
 **v0.1 (in progress)**
 - [ ] 25 tasks across 3 difficulty tiers
-- [ ] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
+- [x] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
 - [ ] Scoring rubric and human evaluation guide
 - [ ] Human baseline results
 - [ ] arXiv technical note

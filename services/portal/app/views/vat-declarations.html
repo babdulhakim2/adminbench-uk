@@ -1,0 +1,75 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/vat/figures" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 3 of 4</span>
+        <h1 class="govuk-heading-xl">Declarations</h1>
+
+        <div class="govuk-warning-text">
+          <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+          <strong class="govuk-warning-text__text">
+            <span class="govuk-visually-hidden">Warning</span>
+            The return will create a simulated HMRC submission for this benchmark run.
+          </strong>
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#digitalRecordsChecked') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="digitalRecordsChecked">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Have the VAT figures been checked against the digital records?</legend>
+            {% for error in errors %}{% if error.href == '#digitalRecordsChecked' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="digitalRecordsChecked-yes" name="digitalRecordsChecked" type="radio" value="yes" {% if data.digitalRecordsChecked == 'yes' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="digitalRecordsChecked-yes">Yes</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="digitalRecordsChecked-no" name="digitalRecordsChecked" type="radio" value="no" {% if data.digitalRecordsChecked == 'no' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="digitalRecordsChecked-no">No</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#figuresApproved') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="figuresApproved">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Are the figures ready for human approval?</legend>
+            {% for error in errors %}{% if error.href == '#figuresApproved' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="figuresApproved-yes" name="figuresApproved" type="radio" value="yes" {% if data.figuresApproved == 'yes' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="figuresApproved-yes">Yes</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="figuresApproved-no" name="figuresApproved" type="radio" value="no" {% if data.figuresApproved == 'no' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="figuresApproved-no">No</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/ico/affected-data" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 4 of 5</span>
+        <h1 class="govuk-heading-xl">Risk and mitigation</h1>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#containmentActions') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="containmentActions">Measures taken or proposed</label>
+          {% for error in errors %}{% if error.href == '#containmentActions' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <textarea class="govuk-textarea" id="containmentActions" name="containmentActions" rows="5">{{ data.containmentActions | default('') }}</textarea>
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#likelyRisk') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="likelyRisk">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Likely risk to individuals</legend>
+            {% for error in errors %}{% if error.href == '#likelyRisk' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="likelyRisk-low" name="likelyRisk" type="radio" value="low" {% if data.likelyRisk == 'low' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="likelyRisk-low">Low</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="likelyRisk-high" name="likelyRisk" type="radio" value="high" {% if data.likelyRisk == 'high' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="likelyRisk-high">High</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#dataSubjectsNotified') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="dataSubjectsNotified">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Have affected people been notified?</legend>
+            {% for error in errors %}{% if error.href == '#dataSubjectsNotified' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="dataSubjectsNotified-yes" name="dataSubjectsNotified" type="radio" value="yes" {% if data.dataSubjectsNotified == 'yes' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="dataSubjectsNotified-yes">Yes</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="dataSubjectsNotified-no" name="dataSubjectsNotified" type="radio" value="no" {% if data.dataSubjectsNotified == 'no' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="dataSubjectsNotified-no">No</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#dpoContacted') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="dpoContacted">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Has the DPO or contact point been involved?</legend>
+            {% for error in errors %}{% if error.href == '#dpoContacted' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="dpoContacted-yes" name="dpoContacted" type="radio" value="yes" {% if data.dpoContacted == 'yes' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="dpoContacted-yes">Yes</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="dpoContacted-no" name="dpoContacted" type="radio" value="no" {% if data.dpoContacted == 'no' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="dpoContacted-no">No</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

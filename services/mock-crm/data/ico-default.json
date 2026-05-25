@@ -1,0 +1,32 @@
+{
+  "id": "ico-001",
+  "taskType": "ico-breach-notification",
+  "status": "open",
+  "organisation": {
+    "organisationName": "Brightwell Dental Care Ltd",
+    "icoRegistrationNumber": "ZA123456",
+    "contactName": "Dr Amira Khan",
+    "contactEmail": "amira.khan@brightwelldental.example",
+    "contactPhone": "01632 960421"
+  },
+  "expected": {
+    "breachNotification": {
+      "awarenessDate": "2026-05-21",
+      "awarenessTime": "09:20",
+      "incidentDate": "2026-05-20",
+      "incidentTime": "16:45",
+      "breachSummary": "A payroll spreadsheet was emailed to an incorrect external recipient.",
+      "affectedIndividuals": "38",
+      "dataCategories": "Names, home addresses, bank account details, National Insurance numbers and salary information",
+      "specialCategoryData": "no",
+      "likelyRisk": "high",
+      "containmentActions": "The recipient confirmed deletion, mailbox rules were reviewed, and affected staff were notified.",
+      "dataSubjectsNotified": "yes",
+      "dpoContacted": "yes"
+    },
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}
