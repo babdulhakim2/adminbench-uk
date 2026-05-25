@@ -1,9 +1,17 @@
 const express = require('express')
-const seedCase = require('./data/ad01-default.json')
+const ad01Case = require('./data/ad01-default.json')
+const vatCase = require('./data/vat-default.json')
+const icoCase = require('./data/ico-default.json')
 
 const app = express()
 const port = Number(process.env.PORT || 4000)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
+const seedFixtures = {
+  'v0.1-default': [ad01Case, vatCase, icoCase],
+  'ad01-default': [ad01Case],
+  'vat-default': [vatCase],
+  'ico-default': [icoCase]
+}
 
 let cases
 let submissionSequence
@@ -13,12 +21,13 @@ function clone (value) {
   return JSON.parse(JSON.stringify(value))
 }
 
-function resetState ({ trialId = null, seed = 'ad01-default' } = {}) {
-  if (seed !== 'ad01-default') {
+function resetState ({ trialId = null, seed = 'v0.1-default' } = {}) {
+  const fixtures = seedFixtures[seed]
+  if (!fixtures) {
     throw new Error(`Unsupported seed: ${seed}`)
   }
 
-  cases = new Map([[seedCase.id, clone(seedCase)]])
+  cases = new Map(fixtures.map(crmCase => [crmCase.id, clone(crmCase)]))
   submissionSequence = 1
   resetMetadata = {
     trialId,
@@ -49,13 +58,18 @@ function mergeDraft (current, patch) {
     ...current,
     ...patch,
     newRegisteredOfficeAddress: patch.newRegisteredOfficeAddress || current.newRegisteredOfficeAddress,
-    declarations: patch.declarations || current.declarations
+    declarations: patch.declarations || current.declarations,
+    vatReturn: patch.vatReturn || current.vatReturn,
+    businessDetails: patch.businessDetails || current.businessDetails,
+    organisationDetails: patch.organisationDetails || current.organisationDetails,
+    breachDetails: patch.breachDetails || current.breachDetails,
+    affectedData: patch.affectedData || current.affectedData,
+    mitigation: patch.mitigation || current.mitigation
   }
 }
 
-function submissionReadinessErrors (crmCase) {
+function ad01ReadinessErrors (draft) {
   const errors = []
-  const draft = crmCase.draft || {}
   const address = draft.newRegisteredOfficeAddress || {}
   const declarations = draft.declarations || {}
 
@@ -70,6 +84,72 @@ function submissionReadinessErrors (crmCase) {
   }
 
   return errors
+}
+
+function vatReadinessErrors (draft) {
+  const errors = []
+  const businessDetails = draft.businessDetails || {}
+  const vatReturn = draft.vatReturn || {}
+  const declarations = draft.declarations || {}
+
+  if (!businessDetails.businessName || !businessDetails.vatRegistrationNumber || !businessDetails.accountingPeriod) {
+    errors.push('vat-business-details-incomplete')
+  }
+
+  for (const box of ['box1', 'box2', 'box3', 'box4', 'box5', 'box6', 'box7', 'box8', 'box9']) {
+    if (vatReturn[box] === undefined || vatReturn[box] === '') {
+      errors.push('vat-figures-incomplete')
+      break
+    }
+  }
+
+  if (declarations.digitalRecordsChecked !== 'yes' || declarations.figuresApproved !== 'yes') {
+    errors.push('vat-declarations-incomplete')
+  }
+
+  return errors
+}
+
+function icoReadinessErrors (draft) {
+  const errors = []
+  const organisationDetails = draft.organisationDetails || {}
+  const breachDetails = draft.breachDetails || {}
+  const affectedData = draft.affectedData || {}
+  const mitigation = draft.mitigation || {}
+
+  if (!organisationDetails.organisationName || !organisationDetails.icoRegistrationNumber || !organisationDetails.contactName || !organisationDetails.contactEmail) {
+    errors.push('ico-organisation-details-incomplete')
+  }
+  if (!breachDetails.awarenessDate || !breachDetails.awarenessTime || !breachDetails.incidentDate || !breachDetails.incidentSummary) {
+    errors.push('ico-breach-details-incomplete')
+  }
+  if (!affectedData.affectedIndividuals || !affectedData.dataCategories || !affectedData.specialCategoryData) {
+    errors.push('ico-affected-data-incomplete')
+  }
+  if (!mitigation.containmentActions || !mitigation.likelyRisk || !mitigation.dataSubjectsNotified || !mitigation.dpoContacted) {
+    errors.push('ico-mitigation-incomplete')
+  }
+
+  return errors
+}
+
+function submissionReadinessErrors (crmCase) {
+  const draft = crmCase.draft || {}
+  if (crmCase.taskType === 'hmrc-vat-return') return vatReadinessErrors(draft)
+  if (crmCase.taskType === 'ico-breach-notification') return icoReadinessErrors(draft)
+  return ad01ReadinessErrors(draft)
+}
+
+function submissionReferencePrefix (taskType) {
+  if (taskType === 'hmrc-vat-return') return 'VAT'
+  if (taskType === 'ico-breach-notification') return 'ICO'
+  return 'AD01'
+}
+
+function submissionStatus (taskType) {
+  if (taskType === 'hmrc-vat-return') return 'submitted-pending-hmrc'
+  if (taskType === 'ico-breach-notification') return 'submitted-pending-ico'
+  return 'submitted-pending-registrar'
 }
 
 resetState()
@@ -131,8 +211,8 @@ app.post('/api/cases/:caseId/submissions', (req, res) => {
   }
 
   const submission = {
-    filingReference: `AD01-${String(submissionSequence).padStart(6, '0')}`,
-    status: 'submitted-pending-registrar',
+    filingReference: `${submissionReferencePrefix(crmCase.taskType)}-${String(submissionSequence).padStart(6, '0')}`,
+    status: submissionStatus(crmCase.taskType),
     approvedByHuman: true,
     submittedBy: req.body.submittedBy || 'unknown',
     submittedAt: new Date().toISOString(),

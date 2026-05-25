@@ -4,10 +4,11 @@ const documents = require('./data/documents')
 const app = express()
 const port = Number(process.env.PORT || 4002)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
+const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'vat-default', 'ico-default'])
 
 let resetMetadata = {
   trialId: null,
-  seed: 'ad01-default',
+  seed: 'v0.1-default',
   resetAt: new Date().toISOString()
 }
 
@@ -44,8 +45,8 @@ app.get('/healthz', (req, res) => {
 })
 
 app.post('/__admin/reset', requireResetToken, (req, res) => {
-  const seed = req.body.seed || 'ad01-default'
-  if (seed !== 'ad01-default') {
+  const seed = req.body.seed || 'v0.1-default'
+  if (!supportedSeeds.has(seed)) {
     res.status(400).json({ ok: false, error: `Unsupported seed: ${seed}` })
     return
   }

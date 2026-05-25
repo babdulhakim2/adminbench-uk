@@ -1,6 +1,6 @@
 const token = process.env.RESET_TOKEN || 'adminbench-reset-token'
 const trialId = process.env.TRIAL_ID || `manual-${Date.now()}`
-const seed = process.env.RESET_SEED || 'ad01-default'
+const seed = process.env.RESET_SEED || 'v0.1-default'
 
 const services = [
   ['portal', process.env.PORTAL_URL || 'http://127.0.0.1:3000'],

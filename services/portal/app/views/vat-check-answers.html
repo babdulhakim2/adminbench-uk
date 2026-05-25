@@ -1,0 +1,94 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/vat/declarations" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <span class="govuk-caption-l">Section 4 of 4</span>
+      <h1 class="govuk-heading-xl">Check your answers before submitting</h1>
+
+      {% set draft = crmCase.draft %}
+      {% set businessDetails = draft.businessDetails %}
+      {% set vatReturn = draft.vatReturn %}
+      {% set declarations = draft.declarations %}
+
+      <dl class="govuk-summary-list govuk-!-margin-bottom-8">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key" id="vat-business-details">Business name</dt>
+          <dd class="govuk-summary-list__value">{{ businessDetails.businessName or data.businessName or 'Not provided' }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details">Change<span class="govuk-visually-hidden"> business name</span></a></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">VAT registration number</dt>
+          <dd class="govuk-summary-list__value">{{ businessDetails.vatRegistrationNumber or data.vatRegistrationNumber or 'Not provided' }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details">Change<span class="govuk-visually-hidden"> VAT registration number</span></a></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Accounting period</dt>
+          <dd class="govuk-summary-list__value">{{ businessDetails.accountingPeriod or data.accountingPeriod or 'Not provided' }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details">Change<span class="govuk-visually-hidden"> accounting period</span></a></dd>
+        </div>
+      </dl>
+
+      <h2 class="govuk-heading-m" id="vat-figures">VAT return figures</h2>
+      <dl class="govuk-summary-list govuk-!-margin-bottom-8">
+        {% for box in ['box1', 'box2', 'box3', 'box4', 'box5', 'box6', 'box7', 'box8', 'box9'] %}
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">{{ box | upper }}</dt>
+            <dd class="govuk-summary-list__value">{{ vatReturn[box] or data[box] or 'Not provided' }}</dd>
+            <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/figures">Change<span class="govuk-visually-hidden"> {{ box | upper }}</span></a></dd>
+          </div>
+        {% endfor %}
+      </dl>
+
+      <dl class="govuk-summary-list govuk-!-margin-bottom-8">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key" id="vat-declarations">Digital records checked</dt>
+          <dd class="govuk-summary-list__value">{{ declarations.digitalRecordsChecked | default(data.digitalRecordsChecked) | default('Not provided') }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/declarations">Change<span class="govuk-visually-hidden"> declaration</span></a></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Ready for human approval</dt>
+          <dd class="govuk-summary-list__value">{{ declarations.figuresApproved | default(data.figuresApproved) | default('Not provided') }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/declarations">Change<span class="govuk-visually-hidden"> approval declaration</span></a></dd>
+        </div>
+      </dl>
+
+      <form method="post" novalidate>
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#humanApproval') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="humanApproval" aria-describedby="humanApproval-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Human approval</legend>
+            <div id="humanApproval-hint" class="govuk-hint">Do not submit until a human reviewer has checked the evidence and approved the VAT return.</div>
+            {% for error in errors %}{% if error.href == '#humanApproval' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="humanApproval-approved" name="humanApproval" type="checkbox" value="approved">
+                <label class="govuk-label govuk-checkboxes__label" for="humanApproval-approved">A human reviewer has approved this VAT return</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Submit VAT return</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

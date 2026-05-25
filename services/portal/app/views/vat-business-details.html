@@ -1,0 +1,57 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/vat/task-list" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 1 of 4</span>
+        <h1 class="govuk-heading-xl">Business details</h1>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#businessName') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="businessName">Business name</label>
+          {% for error in errors %}{% if error.href == '#businessName' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input" id="businessName" name="businessName" type="text" value="{{ data.businessName | default('') }}" autocomplete="organization">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#vatRegistrationNumber') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="vatRegistrationNumber">VAT registration number</label>
+          {% for error in errors %}{% if error.href == '#vatRegistrationNumber' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-10" id="vatRegistrationNumber" name="vatRegistrationNumber" type="text" value="{{ data.vatRegistrationNumber | default('') }}" autocomplete="off">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#accountingPeriod') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="accountingPeriod">VAT accounting period</label>
+          {% for error in errors %}{% if error.href == '#accountingPeriod' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-!-width-two-thirds" id="accountingPeriod" name="accountingPeriod" type="text" value="{{ data.accountingPeriod | default('') }}">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#periodKey') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="periodKey">VAT period key</label>
+          {% for error in errors %}{% if error.href == '#periodKey' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-5" id="periodKey" name="periodKey" type="text" value="{{ data.periodKey | default('') }}" autocomplete="off">
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
