@@ -10,7 +10,7 @@ There are four roles. You don't need to do all of them — even one task review 
 
 ### 1. Domain expert — task authorship
 
-We need people who do UK business admin in practice: company secretaries, accountants (ATT/ACA), HR and payroll practitioners, data protection officers, compliance managers, local authority staff.
+We need people who do UK business admin in practice: company secretaries, accountants (ATT/ACA), data protection officers, and compliance managers.
 
 What this involves:
 - Suggesting realistic admin scenarios we haven't covered
