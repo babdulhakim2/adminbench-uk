@@ -41,15 +41,42 @@ Task design will move in stages:
 
 Do not add a task family to the active catalog until its GOV.UK-style flow, seed data, source documents, reset support, smoke test, and expected outputs are ready to review together.
 
-## Scoring current runs
+## Local and PR validation
 
-Use the evaluation harness to score a completed run from CRM and audit state:
+Run the task catalog validator before opening a PR:
 
 ```bash
-npm run evaluate
+npm run validate:tasks
 ```
 
-The harness scores task completion, document-derived field accuracy, policy compliance, human approval discipline, system hygiene, and audit trail quality for the three ready v0.1 tasks.
+or, without npm:
+
+```bash
+ruby scripts/validate-task-schema.rb
+```
+
+GitHub Actions runs the same validator on PRs that touch task definitions, task seed data, portal task flows, or the validator itself.
+
+The validator checks:
+
+- YAML parses cleanly.
+- `tasks/v0.1.yaml` matches `tasks/schema.yaml`.
+- Task and family IDs are unique.
+- Every task points to an existing family.
+- Task domain and type match the family.
+- Every `ready` task has runnable environment fields, expected outputs, source documents, evidence requirements, scoring rules, and all required artifacts.
+
+## 25-task target
+
+The current GOV.UK-style UI is enough for **25 variants across the existing three flows** if contributors stay within the same form shapes:
+
+| Flow | Variant capacity | Examples |
+|---|---:|---|
+| AD01 registered office change | 8 tasks | clean address change, missing approval, conflicting address evidence, current-vs-new address distractor, optional address line differences |
+| VAT return | 8 tasks | different nine-box figures, zero-value boxes, ledger distractors, period-key distractors, declaration errors |
+| ICO breach notification | 9 tasks | different breach timings, affected counts, data categories, risk levels, containment actions, notification status |
+
+The current UI is **not** enough for 25 structurally different services. It is enough for 25 benchmark tasks only if they are variants of AD01, VAT, and ICO. To make those variants runnable, the next infrastructure step is to support multiple case IDs per flow instead of the current single default case per flow.
 
 ## Required artifacts for a ready task
 

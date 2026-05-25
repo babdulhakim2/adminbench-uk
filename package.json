@@ -9,6 +9,7 @@
     "reset": "node scripts/reset-stack.mjs",
     "evaluate": "node scripts/evaluate-run.mjs",
     "smoke": "node scripts/smoke-test.mjs",
+    "validate:tasks": "ruby scripts/validate-task-schema.rb",
     "lock:services": "npm install --prefix services/portal --package-lock-only --ignore-scripts && npm install --prefix services/mock-crm --package-lock-only --ignore-scripts && npm install --prefix services/audit-sink --package-lock-only --ignore-scripts && npm install --prefix services/document-server --package-lock-only --ignore-scripts"
   },
   "engines": {
