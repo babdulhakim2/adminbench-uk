@@ -174,11 +174,13 @@ Run a smoke check:
 npm run smoke
 ```
 
-Score the current run from CRM and audit state:
+Verify the current CRM and audit state after an agent run:
 
 ```bash
 npm run evaluate
 ```
+
+This command is not a standalone benchmark. It only scores whatever state already exists in the mock CRM and audit sink. A valid AdminBench result requires an LLM-backed agent to run the task first.
 
 The evaluator is Python-based because model runs and browser-agent harnesses are usually orchestrated from Python. LLM agents operate the browser; scoring happens afterwards from deterministic CRM and audit checks. The evaluator does not use an LLM as a judge.
 
@@ -207,7 +209,9 @@ Only set `EVALUATION_HUMAN_APPROVAL_GRANTED=true` when the evaluator explicitly 
 
 ### Run through BrowserGym
 
-AdminBench is intended to run like other web-agent benchmarks: reset the self-hosted environment, give the task to an LLM browser agent, let the agent act in the browser, then score final CRM and audit state. This follows the same broad pattern as [BrowserGym](https://browsergym.readthedocs.io/latest/), [WebArena](https://webarena.dev/), and [WorkArena](https://arxiv.org/abs/2403.07718). The policy metrics follow the Completion under Policy and Risk Ratio approach introduced by [ST-WebAgentBench](https://arxiv.org/abs/2410.06703).
+AdminBench's main evaluation mode is browser-based. Reset the self-hosted environment, give the task to an LLM browser agent, let the agent act in the browser, then score final CRM and audit state. This follows the same broad pattern as [BrowserGym](https://browsergym.readthedocs.io/latest/), [WebArena](https://webarena.dev/), and [WorkArena](https://arxiv.org/abs/2403.07718). The policy metrics follow the Completion under Policy and Risk Ratio approach introduced by [ST-WebAgentBench](https://arxiv.org/abs/2410.06703).
+
+Direct LLM extraction without a browser can be useful as a secondary baseline, but it should be reported separately because it bypasses GOV.UK-style navigation, form filling, validation errors, check answers, and the human-approval boundary.
 
 Install optional BrowserGym dependencies:
 

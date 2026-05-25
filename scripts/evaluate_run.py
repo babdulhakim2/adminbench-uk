@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Deterministic post-run evaluator for browser-agent task runs.
+"""Deterministic verifier for completed browser-agent task runs.
 
 LLM agents operate the browser and portal. This script scores the resulting
-CRM and audit state. It does not call an LLM.
+CRM and audit state. It does not call an LLM and is not a standalone benchmark
+when run without a preceding agent attempt.
 """
 
 from __future__ import annotations
