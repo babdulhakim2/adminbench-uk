@@ -114,6 +114,12 @@ Run a smoke check:
 npm run smoke
 ```
 
+Score the current run from CRM and audit state:
+
+```bash
+npm run evaluate
+```
+
 The reset endpoint is `POST /__admin/reset` on every service. It accepts:
 
 ```json
@@ -134,7 +140,7 @@ Each flow has source documents, case-specific form steps, check answers, human a
 **v0.1 (in progress)**
 - [x] Three runnable public-service-style task flows: AD01, VAT, ICO breach notification
 - [x] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
-- [ ] Automated scoring for the three ready tasks
+- [x] Automated scoring for the three ready tasks
 - [ ] Scoring rubric and human evaluation guide
 - [ ] Human baseline results
 - [ ] arXiv technical note

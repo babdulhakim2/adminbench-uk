@@ -366,7 +366,12 @@ router.post('/__admin/reset', requireResetToken, async (req, res, next) => {
       return
     }
 
-    await fs.rm(path.join(process.cwd(), '.tmp', 'sessions'), { recursive: true, force: true })
+    await fs.rm(path.join(process.cwd(), '.tmp', 'sessions'), {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100
+    })
     res.json({
       ok: true,
       service: 'portal',

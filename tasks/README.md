@@ -41,6 +41,16 @@ Task design will move in stages:
 
 Do not add a task family to the active catalog until its GOV.UK-style flow, seed data, source documents, reset support, smoke test, and expected outputs are ready to review together.
 
+## Scoring current runs
+
+Use the evaluation harness to score a completed run from CRM and audit state:
+
+```bash
+npm run evaluate
+```
+
+The harness scores task completion, document-derived field accuracy, policy compliance, human approval discipline, system hygiene, and audit trail quality for the three ready v0.1 tasks.
+
 ## Required artifacts for a ready task
 
 A PR that marks a task `ready` must include:
