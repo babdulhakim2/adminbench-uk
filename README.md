@@ -71,6 +71,47 @@ Results are reported using **pass^k** (reliability across repeated trials), not 
 
 These are the only runnable v0.1 task families. Future domains and task types should be added in separate proposals after this three-flow benchmark is stable.
 
+### v0.1 Task Inventory
+
+The current Docker UI can support a 30-task v0.1 set as variants of the three existing flows. Tasks marked `ready` are already implemented in the catalog. Tasks marked `candidate` are contribution slots that should reuse the existing UI pattern, with new source documents, CRM seed data, expected outputs, and scoring checks.
+
+| Stack | Task ID | Scenario | Status | UI needed |
+|---|---|---|---|---|
+| Companies House AD01 | `abuk-v0.1-ad01-001` | Standard registered office change | `ready` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-002` | New address appears in all documents, with optional address line variation | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-003` | Client email and board resolution disagree on postcode | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-004` | Current registered office is a distractor in the source documents | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-005` | Office provider confirmation is missing | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-006` | Human approval is explicitly withheld | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-007` | New address is outside the company jurisdiction | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-008` | Authentication code is absent from the instruction pack | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-009` | Board resolution uses abbreviated address formatting | `candidate` | Existing AD01 UI |
+| Companies House AD01 | `abuk-v0.1-ad01-010` | Multiple companies appear in the mailbox extract | `candidate` | Existing AD01 UI |
+| HMRC VAT | `abuk-v0.1-vat-001` | Standard VAT return from prepared workings | `ready` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-002` | Zero-rated period with zero-value output boxes | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-003` | Ledger contains draft figures and final figures | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-004` | Period key in client email conflicts with workings | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-005` | Box 5 is a repayment rather than an amount payable | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-006` | Purchase ledger contains non-deductible VAT distractor | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-007` | Sales totals are split across multiple extracts | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-008` | No EU or Northern Ireland goods movements | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-009` | Human approval has not yet been granted | `candidate` | Existing VAT UI |
+| HMRC VAT | `abuk-v0.1-vat-010` | VAT registration number appears in two formats | `candidate` | Existing VAT UI |
+| ICO breach notification | `abuk-v0.1-ico-001` | Standard personal data breach notification | `ready` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-002` | Low-risk breach where notification may not be required | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-003` | High-risk breach with delayed awareness date | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-004` | Affected individual count is approximate | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-005` | Special category data is present | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-006` | Containment action is incomplete | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-007` | Data subjects have not yet been notified | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-008` | Incident report and DPO assessment disagree on risk level | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-009` | Contact details are split across multiple documents | `candidate` | Existing ICO UI |
+| ICO breach notification | `abuk-v0.1-ico-010` | Wrong-recipient breach with deletion confirmation missing | `candidate` | Existing ICO UI |
+
+This inventory does not require new UI. It does require multi-case support so each flow can load different case IDs and seeds. A new UI should only be created for a new task family outside AD01, VAT, or ICO breach notification.
+
+ICO registration and fee maintenance is a separate future stack from the current ICO breach-notification flow. The official [ICO data protection fee service](https://ico.org.uk/for-organisations/data-protection-fee/) lists five pay/manage registration actions: register and pay for the first time, pay or renew the annual data protection fee, update registration details, cancel a registration and fee, and pay a penalty for non-payment. The current ICO UI instead models the [ICO personal data breach reporting](https://ico.org.uk/for-organisations/report-a-breach/personal-data-breach/personal-data-breach-reporting/) path, so registration and fee tasks should not be treated as variants of the breach-notification UI.
+
 ---
 
 ## Environments
