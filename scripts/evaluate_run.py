@@ -34,7 +34,7 @@ DEFAULT_CASE_IDS = ["ad01-001", "vat-001", "ico-001"]
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Score an AdminBench-UK browser-agent run from CRM and audit state."
+        description="Verify an AdminBench-UK browser-agent run from CRM and audit state."
     )
     parser.add_argument(
         "--case-ids",
