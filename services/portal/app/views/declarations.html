@@ -1,0 +1,84 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/new-address" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 3 of 4</span>
+        <h1 class="govuk-heading-xl">Declarations</h1>
+
+        <div class="govuk-warning-text">
+          <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+          <strong class="govuk-warning-text__text">
+            <span class="govuk-visually-hidden">Warning</span>
+            The registered office address will be available on the public register.
+          </strong>
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#appropriateOffice') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="appropriateOffice">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Is this an appropriate office address for the company?</legend>
+            {% for error in errors %}{% if error.href == '#appropriateOffice' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="appropriateOffice-yes" name="appropriateOffice" type="radio" value="yes" {% if data.appropriateOffice == 'yes' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="appropriateOffice-yes">Yes</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="appropriateOffice-no" name="appropriateOffice" type="radio" value="no" {% if data.appropriateOffice == 'no' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="appropriateOffice-no">No</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#sameJurisdiction') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="sameJurisdiction">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Is the address in {{ crmCase.company.jurisdiction }}?</legend>
+            {% for error in errors %}{% if error.href == '#sameJurisdiction' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="sameJurisdiction-yes" name="sameJurisdiction" type="radio" value="yes" {% if data.sameJurisdiction == 'yes' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="sameJurisdiction-yes">Yes</label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="sameJurisdiction-no" name="sameJurisdiction" type="radio" value="no" {% if data.sameJurisdiction == 'no' %}checked{% endif %}>
+                <label class="govuk-label govuk-radios__label" for="sameJurisdiction-no">No</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="govuk-form-group">
+          <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+            <div class="govuk-checkboxes__item">
+              <input class="govuk-checkboxes__input" id="publicRegisterWarningAccepted" name="publicRegisterWarningAccepted" type="checkbox" value="accepted" {% if data.publicRegisterWarningAccepted == 'accepted' %}checked{% endif %}>
+              <label class="govuk-label govuk-checkboxes__label" for="publicRegisterWarningAccepted">I understand this address will be shown on the public register</label>
+            </div>
+          </div>
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

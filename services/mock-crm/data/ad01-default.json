@@ -1,0 +1,33 @@
+{
+  "id": "ad01-001",
+  "taskType": "companies-house-ad01",
+  "status": "open",
+  "company": {
+    "companyNumber": "12345678",
+    "companyName": "Northbridge Coffee Roasters Limited",
+    "authenticationCode": "ZXCV1234",
+    "jurisdiction": "England and Wales",
+    "currentRegisteredOfficeAddress": {
+      "line1": "Unit 4, Old Mill Yard",
+      "line2": "Bramley Road",
+      "townOrCity": "Leeds",
+      "county": "West Yorkshire",
+      "postcode": "LS1 4AB",
+      "country": "England"
+    }
+  },
+  "expected": {
+    "newRegisteredOfficeAddress": {
+      "line1": "Suite 12, Albion Works",
+      "line2": "18 Pollard Street",
+      "townOrCity": "Manchester",
+      "county": "Greater Manchester",
+      "postcode": "M4 7AJ",
+      "country": "England"
+    },
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}

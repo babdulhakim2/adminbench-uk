@@ -1,0 +1,73 @@
+name: adminbench-uk
+
+services:
+  portal:
+    build:
+      context: ./services/portal
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      USE_AUTH: "false"
+      USE_HTTPS: "false"
+      USE_BROWSER_SYNC: "false"
+      RESET_TOKEN: ${RESET_TOKEN:-adminbench-reset-token}
+      CRM_API_URL: http://crm-api:4000
+      AUDIT_URL: http://audit-sink:4001
+      DOCUMENT_SERVER_URL: http://document-server:4002
+      PUBLIC_DOCUMENT_SERVER_URL: http://localhost:4002
+    ports:
+      - "3000:3000"
+    depends_on:
+      crm-api:
+        condition: service_healthy
+      audit-sink:
+        condition: service_healthy
+      document-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  crm-api:
+    build:
+      context: ./services/mock-crm
+    environment:
+      PORT: "4000"
+      RESET_TOKEN: ${RESET_TOKEN:-adminbench-reset-token}
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  audit-sink:
+    build:
+      context: ./services/audit-sink
+    environment:
+      PORT: "4001"
+      RESET_TOKEN: ${RESET_TOKEN:-adminbench-reset-token}
+    ports:
+      - "4001:4001"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  document-server:
+    build:
+      context: ./services/document-server
+    environment:
+      PORT: "4002"
+      RESET_TOKEN: ${RESET_TOKEN:-adminbench-reset-token}
+    ports:
+      - "4002:4002"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4002/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

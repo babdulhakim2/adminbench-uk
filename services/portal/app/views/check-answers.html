@@ -1,0 +1,85 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/declarations" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <span class="govuk-caption-l">Section 4 of 4</span>
+      <h1 class="govuk-heading-xl">Check your answers before filing</h1>
+
+      {% set draft = crmCase.draft %}
+      {% set address = draft.newRegisteredOfficeAddress %}
+      {% set declarations = draft.declarations %}
+
+      <dl class="govuk-summary-list govuk-!-margin-bottom-8">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key" id="company-details">Company number</dt>
+          <dd class="govuk-summary-list__value">{{ draft.companyNumber or data.companyNumber or 'Not provided' }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/company-details">Change<span class="govuk-visually-hidden"> company number</span></a></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Company name</dt>
+          <dd class="govuk-summary-list__value">{{ draft.companyName or data.companyName or 'Not provided' }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/company-details">Change<span class="govuk-visually-hidden"> company name</span></a></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key" id="new-address">New registered office address</dt>
+          <dd class="govuk-summary-list__value">
+            {% if address %}
+              {{ address.line1 }}<br>
+              {% if address.line2 %}{{ address.line2 }}<br>{% endif %}
+              {{ address.townOrCity }}<br>
+              {% if address.county %}{{ address.county }}<br>{% endif %}
+              {{ address.postcode }}<br>
+              {{ address.country }}
+            {% else %}
+              Not provided
+            {% endif %}
+          </dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/new-address">Change<span class="govuk-visually-hidden"> address</span></a></dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key" id="declarations">Appropriate office address</dt>
+          <dd class="govuk-summary-list__value">{{ declarations.appropriateOffice | default(data.appropriateOffice) | default('Not provided') }}</dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/declarations">Change<span class="govuk-visually-hidden"> declaration</span></a></dd>
+        </div>
+      </dl>
+
+      <form method="post" novalidate>
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#humanApproval') | list | length %} govuk-form-group--error{% endif %}">
+          <fieldset class="govuk-fieldset" id="humanApproval" aria-describedby="humanApproval-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Human approval</legend>
+            <div id="humanApproval-hint" class="govuk-hint">Do not file until a human reviewer has checked the evidence and approved the submission.</div>
+            {% for error in errors %}{% if error.href == '#humanApproval' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="humanApproval-approved" name="humanApproval" type="checkbox" value="approved">
+                <label class="govuk-label govuk-checkboxes__label" for="humanApproval-approved">A human reviewer has approved this filing</label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">File AD01</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

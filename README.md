@@ -74,9 +74,49 @@ Results are reported using **pass^k** (reliability across repeated trials), not 
 
 Portal environments run as Docker containers. Each implements a realistic GOV.UK-style multi-page form flow using the official GOV.UK Frontend library (MIT licence). Environments reset to a clean state between trials for reproducible evaluation.
 
+### Run the AD01 environment
+
+The first v0.1 environment is a Companies House AD01 registered office address task.
+
+Start the stack:
+
 ```bash
-docker compose up   # starts portal, CRM, audit sink, and document server
+docker compose up --build
 ```
+
+Open the services:
+
+| Service | URL | Purpose |
+|---|---|---|
+| Portal | `http://localhost:3000` | GOV.UK Prototype Kit AD01 form |
+| Mock CRM | `http://localhost:4000/api/cases/ad01-001` | Case state, draft updates, submission state |
+| Audit sink | `http://localhost:4001/events` | Captured portal and agent events |
+| Document server | `http://localhost:4002/documents` | Source documents for the task |
+
+Reset the environment between evaluation runs:
+
+```bash
+npm run reset
+```
+
+Run a smoke check:
+
+```bash
+npm run smoke
+```
+
+The reset endpoint is `POST /__admin/reset` on every service. It accepts:
+
+```json
+{
+  "trialId": "ad01-run-001",
+  "seed": "ad01-default"
+}
+```
+
+Use `RESET_TOKEN` to override the local default reset token. v0.1 currently supports the `ad01-default` seed.
+
+The AD01 flow is: task list, source documents, company details, new registered office address, declarations, check answers, human approval, and simulated submission. The final filing is blocked unless the draft is complete and human approval is confirmed.
 
 ---
 

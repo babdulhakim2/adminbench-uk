@@ -1,0 +1,18 @@
+//
+// Keep custom styling light so pages remain visually aligned with GOV.UK Frontend.
+//
+
+.adminbench-document-list {
+  border-top: 1px solid #b1b4b6;
+  margin-bottom: 30px;
+}
+
+.adminbench-document-list__item {
+  border-bottom: 1px solid #b1b4b6;
+  padding: 15px 0;
+}
+
+.adminbench-metadata {
+  color: #505a5f;
+  display: block;
+}
