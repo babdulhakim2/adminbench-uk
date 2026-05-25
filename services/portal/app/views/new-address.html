@@ -1,0 +1,73 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/company-details" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 2 of 4</span>
+        <h1 class="govuk-heading-xl">What is the new registered office address?</h1>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#addressLine1') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label" for="addressLine1">Address line 1</label>
+          {% for error in errors %}{% if error.href == '#addressLine1' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input" id="addressLine1" name="addressLine1" type="text" value="{{ data.addressLine1 | default('') }}" autocomplete="address-line1">
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="addressLine2">Address line 2</label>
+          <input class="govuk-input" id="addressLine2" name="addressLine2" type="text" value="{{ data.addressLine2 | default('') }}" autocomplete="address-line2">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#townOrCity') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label" for="townOrCity">Town or city</label>
+          {% for error in errors %}{% if error.href == '#townOrCity' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-!-width-two-thirds" id="townOrCity" name="townOrCity" type="text" value="{{ data.townOrCity | default('') }}" autocomplete="address-level2">
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="county">County</label>
+          <input class="govuk-input govuk-!-width-two-thirds" id="county" name="county" type="text" value="{{ data.county | default('') }}">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#postcode') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label" for="postcode">Postcode</label>
+          {% for error in errors %}{% if error.href == '#postcode' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <input class="govuk-input govuk-input--width-10" id="postcode" name="postcode" type="text" value="{{ data.postcode | default('') }}" autocomplete="postal-code">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#country') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label" for="country">Country</label>
+          {% for error in errors %}{% if error.href == '#country' %}<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>{% endif %}{% endfor %}
+          <select class="govuk-select" id="country" name="country">
+            <option value=""></option>
+            <option value="England" {% if data.country == 'England' %}selected{% endif %}>England</option>
+            <option value="Wales" {% if data.country == 'Wales' %}selected{% endif %}>Wales</option>
+            <option value="Scotland" {% if data.country == 'Scotland' %}selected{% endif %}>Scotland</option>
+            <option value="Northern Ireland" {% if data.country == 'Northern Ireland' %}selected{% endif %}>Northern Ireland</option>
+          </select>
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

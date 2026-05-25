@@ -1,0 +1,16 @@
+{
+  "name": "adminbench-uk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dockerised v0.1 environment scaffold for AdminBench-UK.",
+  "scripts": {
+    "compose:up": "docker compose up --build",
+    "compose:down": "docker compose down --volumes",
+    "reset": "node scripts/reset-stack.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "lock:services": "npm install --prefix services/portal --package-lock-only --ignore-scripts && npm install --prefix services/mock-crm --package-lock-only --ignore-scripts && npm install --prefix services/audit-sink --package-lock-only --ignore-scripts && npm install --prefix services/document-server --package-lock-only --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

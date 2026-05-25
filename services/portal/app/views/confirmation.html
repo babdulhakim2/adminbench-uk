@@ -1,0 +1,23 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-panel govuk-panel--confirmation">
+        <h1 class="govuk-panel__title">Application complete</h1>
+        <div class="govuk-panel__body">
+          Reference<br><strong>{{ data.submissionReference or crmCase.submissions[0].filingReference }}</strong>
+        </div>
+      </div>
+
+      <p class="govuk-body">The AD01 filing has been sent to the mock Companies House service for this benchmark run.</p>
+      <p class="govuk-body">The audit sink records the submission event and the CRM now contains the filed address draft.</p>
+
+      <p class="govuk-body">
+        <a class="govuk-link" href="/task-list">Return to task list</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}

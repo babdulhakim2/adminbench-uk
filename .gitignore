@@ -3,6 +3,11 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Node.js / Docker service ignores
+node_modules/
+.tmp/
+npm-debug.log*
+
 # C extensions
 *.so
 

@@ -1,0 +1,64 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <a href="/task-list" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if errors and errors.length %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+          <div role="alert">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                {% for error in errors %}
+                  <li><a href="{{ error.href }}">{{ error.text }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <span class="govuk-caption-l">Section 1 of 4</span>
+        <h1 class="govuk-heading-xl">Company details</h1>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#companyNumber') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="companyNumber">Company number</label>
+          {% for error in errors %}
+            {% if error.href == '#companyNumber' %}
+              <p id="companyNumber-error" class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>
+            {% endif %}
+          {% endfor %}
+          <input class="govuk-input govuk-input--width-10" id="companyNumber" name="companyNumber" type="text" value="{{ data.companyNumber | default('') }}" autocomplete="off">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#companyName') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="companyName">Company name</label>
+          {% for error in errors %}
+            {% if error.href == '#companyName' %}
+              <p id="companyName-error" class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>
+            {% endif %}
+          {% endfor %}
+          <input class="govuk-input" id="companyName" name="companyName" type="text" value="{{ data.companyName | default('') }}" autocomplete="organization">
+        </div>
+
+        <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#authenticationCode') | list | length %} govuk-form-group--error{% endif %}">
+          <label class="govuk-label govuk-label--m" for="authenticationCode">Company authentication code</label>
+          <div id="authenticationCode-hint" class="govuk-hint">This is in the client instruction document.</div>
+          {% for error in errors %}
+            {% if error.href == '#authenticationCode' %}
+              <p id="authenticationCode-error" class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> {{ error.text }}</p>
+            {% endif %}
+          {% endfor %}
+          <input class="govuk-input govuk-input--width-10" id="authenticationCode" name="authenticationCode" type="text" value="{{ data.authenticationCode | default('') }}" aria-describedby="authenticationCode-hint">
+        </div>
+
+        <button class="govuk-button" data-module="govuk-button">Save and continue</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

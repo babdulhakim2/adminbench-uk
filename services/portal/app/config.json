@@ -1,0 +1,10 @@
+{
+  "serviceName": "File changes with Companies House",
+  "useServiceNavigation": true,
+  "useAutoStoreData": true,
+  "plugins": {
+    "govuk-frontend": {
+      "rebrand": true
+    }
+  }
+}
