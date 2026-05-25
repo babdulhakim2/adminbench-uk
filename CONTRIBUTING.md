@@ -58,6 +58,8 @@ Open areas:
 **For task suggestions and domain review:**
 Open a GitHub issue using the `task-suggestion` or `review-request` template. Include your background briefly so we can match you to the right domain.
 
+Task authors should follow the schema and checklist in [`tasks/README.md`](tasks/README.md). New runnable tasks need a YAML catalog entry, source documents, a CRM seed, a GOV.UK Frontend portal flow, reset support, smoke-test coverage, expected outputs, and human approval rules.
+
 **For agent evaluation:**
 Open an issue using the `evaluation-run` template or email `[your contact]`. We'll share access to the v0.1 task pack and harness once it's ready.
 
