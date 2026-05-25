@@ -28,6 +28,19 @@ The v0.1 catalog is intentionally limited to the three runnable public-service-s
 
 Only tasks marked `ready` are part of a scored benchmark run. Future task families should be proposed in separate issues and PRs after the current three-flow benchmark is stable.
 
+## Task design roadmap
+
+Task design will move in stages:
+
+| Stage | Focus | Output |
+|---|---|---|
+| v0.1 | Stabilise the three runnable flows: AD01, VAT, and ICO breach notification | One canonical task per flow with complete evidence, expected outputs, reset support, and scoring rules |
+| v0.1.x | Add variants within the same three flows | Distractor documents, missing approval, conflicting evidence, and harder extraction cases |
+| v0.2 | Add new public-service-style task families | Separate proposals with service pattern notes, source documents, CRM seeds, UI flow, smoke tests, and scoring rules |
+| v0.3 | Broaden task difficulty and evaluation depth | Multi-case runs, stronger uncertainty tests, richer audit scoring, and pass^k reporting across more seeds |
+
+Do not add a task family to the active catalog until its GOV.UK-style flow, seed data, source documents, reset support, smoke test, and expected outputs are ready to review together.
+
 ## Required artifacts for a ready task
 
 A PR that marks a task `ready` must include:

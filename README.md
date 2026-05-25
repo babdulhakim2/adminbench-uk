@@ -143,6 +143,8 @@ Each flow has source documents, case-specific form steps, check answers, human a
 - [ ] Additional task families and distractor variants
 - [ ] BrowserGym integration
 
+Task design roadmap details are in [`tasks/README.md`](tasks/README.md). New task families should land only when their source documents, seed data, GOV.UK-style UI flow, reset support, smoke test, and expected outputs are ready together.
+
 ---
 
 ## Contributing
