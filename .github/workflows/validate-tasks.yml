@@ -1,0 +1,41 @@
+name: Validate task catalog
+
+on:
+  pull_request:
+    paths:
+      - "tasks/**"
+      - "services/mock-crm/data/**"
+      - "services/document-server/data/**"
+      - "services/portal/app/routes.js"
+      - "services/portal/app/views/**"
+      - "scripts/smoke-test.mjs"
+      - "scripts/validate-task-schema.rb"
+      - ".github/workflows/validate-tasks.yml"
+      - "package.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "tasks/**"
+      - "services/mock-crm/data/**"
+      - "services/document-server/data/**"
+      - "services/portal/app/routes.js"
+      - "services/portal/app/views/**"
+      - "scripts/smoke-test.mjs"
+      - "scripts/validate-task-schema.rb"
+      - ".github/workflows/validate-tasks.yml"
+      - "package.json"
+
+jobs:
+  validate-task-catalog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show Ruby version
+        run: ruby --version
+
+      - name: Validate task catalog schema
+        run: ruby scripts/validate-task-schema.rb
