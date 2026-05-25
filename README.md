@@ -22,7 +22,7 @@ AI agents are being actively marketed as the solution. The problem is that almos
 
 ## What is AdminBench-UK?
 
-AdminBench-UK tests whether AI agents can safely complete real UK business admin tasks — Companies House filings, HMRC-style workflows, ICO notifications, supplier onboarding, and more.
+AdminBench-UK tests whether AI agents can safely complete real UK business admin tasks. v0.1 focuses on three public-service-style workflows: a Companies House filing, an HMRC-style VAT return, and an ICO breach notification.
 
 Most agent benchmarks test whether an agent can *navigate* a website. AdminBench-UK tests what actually matters in admin work:
 
@@ -63,14 +63,13 @@ Results are reported using **pass^k** (reliability across repeated trials), not 
 
 ---
 
-## Task domains
+## v0.1 Task Domains
 
-- **Companies House** — registered office changes, director appointments, confirmation statements
-- **HMRC-style** — VAT returns, PAYE processing, corporation tax
-- **Data protection** — ICO breach notifications, GDPR DSARs, right-to-work checks
-- **Internal admin** — supplier onboarding, contract renewal, policy sign-off
+- **Companies House** — AD01 registered office change
+- **HMRC-style** — VAT return preparation
+- **Data protection** — ICO personal data breach notification
 
-The v0.1 catalog tracks all of these task families. Only tasks marked `ready` in the catalog are included in scored runs; `planned` tasks are contribution targets.
+These are the only runnable v0.1 task families. Future domains and task types should be added in separate proposals after this three-flow benchmark is stable.
 
 ---
 
@@ -133,15 +132,18 @@ Each flow has source documents, case-specific form steps, check answers, human a
 ## Roadmap
 
 **v0.1 (in progress)**
-- [ ] 25 tasks across 3 difficulty tiers
+- [x] Three runnable public-service-style task flows: AD01, VAT, ICO breach notification
 - [x] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
+- [ ] Automated scoring for the three ready tasks
 - [ ] Scoring rubric and human evaluation guide
 - [ ] Human baseline results
 - [ ] arXiv technical note
 
 **v0.2**
-- [ ] 50+ tasks, distractor variants, automated scoring
+- [ ] Additional task families and distractor variants
 - [ ] BrowserGym integration
+
+Task design roadmap details are in [`tasks/README.md`](tasks/README.md). New task families should land only when their source documents, seed data, GOV.UK-style UI flow, reset support, smoke test, and expected outputs are ready together.
 
 ---
 
@@ -149,7 +151,7 @@ Each flow has source documents, case-specific form steps, check answers, human a
 
 The project needs four types of contributor:
 
-**Domain experts** — people who know UK company secretarial work, accountancy, HR compliance, or data protection and can help design or review tasks for accuracy.
+**Domain experts** — people who know UK company secretarial work, accountancy, or data protection and can help design or review tasks for accuracy.
 
 **Regulatory reviewers** — qualified practitioners (solicitors, chartered accountants, compliance officers) who can sign off that tasks correctly represent real regulatory requirements.
 

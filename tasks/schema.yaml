@@ -300,7 +300,6 @@ $defs:
       - "companies-house"
       - "hmrc"
       - "data-protection"
-      - "internal-admin"
   priority:
     type: "string"
     enum:
@@ -310,7 +309,6 @@ $defs:
   status:
     type: "string"
     enum:
-      - "planned"
       - "candidate"
       - "ready"
       - "blocked"

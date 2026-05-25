@@ -11,7 +11,6 @@ Use `status` consistently:
 
 | Status | Meaning |
 |---|---|
-| `planned` | The task family or task slot is in scope, but the runnable environment and ground truth are not complete. |
 | `candidate` | The task has draft artifacts, but needs review, scoring, or smoke-test coverage. |
 | `ready` | The task is runnable, has source documents, expected outputs, scoring rules, reset support, and smoke-test coverage. |
 | `blocked` | Work is paused because a policy, data, or implementation question must be resolved. |
@@ -19,16 +18,28 @@ Use `status` consistently:
 
 ## v0.1 coverage
 
-The v0.1 target covers these task families:
+The v0.1 catalog is intentionally limited to the three runnable public-service-style flows in the Docker stack:
 
 | Domain | Task families |
 |---|---|
-| Companies House | Registered office changes, director appointments, confirmation statements |
-| HMRC-style | VAT returns, PAYE processing, corporation tax |
-| Data protection | ICO breach notifications, GDPR DSARs, right-to-work checks |
-| Internal admin | Supplier onboarding, contract renewal, policy sign-off |
+| Companies House | AD01 registered office changes |
+| HMRC-style | VAT returns |
+| Data protection | ICO personal data breach notifications |
 
-Only tasks marked `ready` are part of a scored benchmark run. Planned tasks exist to show contributors what should be built next.
+Only tasks marked `ready` are part of a scored benchmark run. Future task families should be proposed in separate issues and PRs after the current three-flow benchmark is stable.
+
+## Task design roadmap
+
+Task design will move in stages:
+
+| Stage | Focus | Output |
+|---|---|---|
+| v0.1 | Stabilise the three runnable flows: AD01, VAT, and ICO breach notification | One canonical task per flow with complete evidence, expected outputs, reset support, and scoring rules |
+| v0.1.x | Add variants within the same three flows | Distractor documents, missing approval, conflicting evidence, and harder extraction cases |
+| v0.2 | Add new public-service-style task families | Separate proposals with service pattern notes, source documents, CRM seeds, UI flow, smoke tests, and scoring rules |
+| v0.3 | Broaden task difficulty and evaluation depth | Multi-case runs, stronger uncertainty tests, richer audit scoring, and pass^k reporting across more seeds |
+
+Do not add a task family to the active catalog until its GOV.UK-style flow, seed data, source documents, reset support, smoke test, and expected outputs are ready to review together.
 
 ## Required artifacts for a ready task
 
@@ -67,16 +78,14 @@ All portal flows should feel like a real UK public-sector service:
 - Use one question or tightly related question group per page.
 - Make the current task and next action obvious without explanatory marketing text.
 - Keep irreversible submission separate from preparation, with a visible human approval gate.
-- Use plain, service-specific labels that resemble the relevant Companies House, HMRC, ICO, GOV.UK, or internal admin workflow.
+- Use plain, service-specific labels that resemble the relevant Companies House, HMRC, or ICO workflow.
 - Do not invent decorative UI that would not appear in a GOV.UK service.
-
-Internal admin tasks are still rendered in GOV.UK style so agents face a consistent interaction model across the benchmark.
 
 ## Contribution checklist
 
 Before opening a task PR:
 
-- Mark incomplete tasks as `planned` or `candidate`, not `ready`.
+- Mark incomplete tasks as `candidate` or `blocked`, not `ready`.
 - Cite or describe the official procedure or service pattern being modelled.
 - Include enough source documents for every expected output to be evidence-grounded.
 - Add at least one uncertainty or approval boundary where a production agent should stop instead of guessing.
