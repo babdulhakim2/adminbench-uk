@@ -18,13 +18,23 @@ Use `status` consistently:
 
 ## v0.1 coverage
 
-The v0.1 catalog is intentionally limited to the three runnable public-service-style flows in the Docker stack:
+The v0.1 catalog is intentionally limited to the three runnable organisation-facing public-service flows in the Docker stack.
+
+These are workflows that a company, accountant, data protection officer, or authorised representative can see from public guidance. They are not internal regulator, Companies House, HMRC, or ICO back-office workflows.
 
 | Domain | Task families |
 |---|---|
 | Companies House | AD01 registered office changes |
 | HMRC-style | VAT returns |
 | Data protection | ICO personal data breach notifications |
+
+Source basis for the v0.1 scope:
+
+| Flow | Public source being modelled | Boundary |
+|---|---|---|
+| Companies House AD01 | [Change a company's registered office address (AD01)](https://www.gov.uk/government/publications/change-a-registered-office-address-ad01) | Organisation-side filing only; do not model Companies House review or back-office processing. |
+| HMRC-style VAT | [Sending a VAT Return](https://www.gov.uk/submit-vat-return) and [what to include in a VAT Return](https://www.gov.uk/submit-vat-return/what-to-include-in-a-vat-return) | Organisation/accountant-side preparation from source documents; do not model HMRC internal compliance checks. |
+| ICO breach notification | [Report a data breach online form](https://ico.org.uk/for-organisations/report-a-breach/personal-data-breach/report-a-data-breach-online-form/) and [personal data breach guide](https://ico.org.uk/for-organisations/report-a-breach/personal-data-breach/personal-data-breaches-a-guide/) | Organisation-side notification and evidence gathering; do not model ICO case triage or regulatory decisions. |
 
 Only tasks marked `ready` are part of a scored benchmark run. Future task families should be proposed in separate issues and PRs after the current three-flow benchmark is stable.
 
@@ -36,7 +46,7 @@ Task design will move in stages:
 |---|---|---|
 | v0.1 | Stabilise the three runnable flows: AD01, VAT, and ICO breach notification | One canonical task per flow with complete evidence, expected outputs, reset support, and scoring rules |
 | v0.1.x | Add variants within the same three flows | Distractor documents, missing approval, conflicting evidence, and harder extraction cases |
-| v0.2 | Add new public-service-style task families | Separate proposals with service pattern notes, source documents, CRM seeds, UI flow, smoke tests, and scoring rules |
+| v0.2 | Add new organisation-facing public-service task families | Separate proposals with service pattern notes, source documents, CRM seeds, UI flow, smoke tests, and scoring rules |
 | v0.3 | Broaden task difficulty and evaluation depth | Multi-case runs, stronger uncertainty tests, richer audit scoring, and pass^k reporting across more seeds |
 
 Do not add a task family to the active catalog until its GOV.UK-style flow, seed data, source documents, reset support, smoke test, and expected outputs are ready to review together.
@@ -66,17 +76,17 @@ The validator checks:
 - Task domain and type match the family.
 - Every `ready` task has runnable environment fields, expected outputs, source documents, evidence requirements, scoring rules, and all required artifacts.
 
-## 25-task target
+## Current UI capacity
 
-The current GOV.UK-style UI is enough for **25 variants across the existing three flows** if contributors stay within the same form shapes:
+The current GOV.UK-style UI can support a broad variant set across the existing three flows if contributors stay within the same form shapes. The README lists 45 concrete slots, but that number is not a hard cap.
 
-| Flow | Variant capacity | Examples |
+| Flow | Current safe capacity | Examples |
 |---|---:|---|
-| AD01 registered office change | 8 tasks | clean address change, missing approval, conflicting address evidence, current-vs-new address distractor, optional address line differences |
-| VAT return | 8 tasks | different nine-box figures, zero-value boxes, ledger distractors, period-key distractors, declaration errors |
-| ICO breach notification | 9 tasks | different breach timings, affected counts, data categories, risk levels, containment actions, notification status |
+| AD01 registered office change | 15+ tasks | address evidence, authentication-code issues, same-jurisdiction checks, appropriate-office evidence, public-register warning, paper-only blockers |
+| VAT return | 15+ tasks | nine-box figures, zero-value boxes, ledger distractors, period-key distractors, MTD export conflicts, estimated-figure blockers |
+| ICO breach notification | 15+ tasks | breach timings, affected counts, data categories, special-category data, risk level, containment actions, notification status |
 
-The current UI is **not** enough for 25 structurally different services. It is enough for 25 benchmark tasks only if they are variants of AD01, VAT, and ICO. To make those variants runnable, the next infrastructure step is to support multiple case IDs per flow instead of the current single default case per flow.
+The current UI is **not** enough for structurally different services. It is enough for more benchmark tasks only when they are variants of AD01, VAT, and ICO breach notification. To make those variants runnable, the next infrastructure step is to support multiple case IDs per flow instead of the current single default case per flow.
 
 ## Required artifacts for a ready task
 
