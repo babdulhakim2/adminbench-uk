@@ -1,0 +1,350 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://adminbench.uk/schemas/task-catalog-v0.1.schema.json"
+title: "AdminBench-UK task catalog schema"
+description: "Schema for task catalogs used to define AdminBench-UK benchmark tasks."
+type: "object"
+required:
+  - "schema_version"
+  - "catalog_version"
+  - "name"
+  - "description"
+  - "runtime"
+  - "evaluation"
+  - "task_families"
+  - "tasks"
+additionalProperties: false
+properties:
+  schema_version:
+    type: "string"
+    const: "0.1"
+  catalog_version:
+    type: "string"
+  name:
+    type: "string"
+    minLength: 1
+  description:
+    type: "string"
+    minLength: 1
+  runtime:
+    type: "object"
+    required:
+      - "stack"
+      - "reset_seed"
+      - "reset_protocol"
+      - "services"
+    additionalProperties: false
+    properties:
+      stack:
+        type: "string"
+        enum:
+          - "docker-compose"
+      reset_seed:
+        type: "string"
+        minLength: 1
+      reset_protocol:
+        type: "object"
+        required:
+          - "method"
+          - "path"
+          - "body"
+        additionalProperties: false
+        properties:
+          method:
+            type: "string"
+            enum:
+              - "POST"
+          path:
+            type: "string"
+            pattern: "^/"
+          body:
+            type: "object"
+            additionalProperties: true
+      services:
+        type: "object"
+        required:
+          - "portal"
+          - "crm"
+          - "audit"
+          - "documents"
+        additionalProperties: false
+        properties:
+          portal:
+            type: "string"
+          crm:
+            type: "string"
+          audit:
+            type: "string"
+          documents:
+            type: "string"
+  evaluation:
+    type: "object"
+    required:
+      - "metric"
+      - "required_agent_behaviour"
+      - "scoring_dimensions"
+    additionalProperties: false
+    properties:
+      metric:
+        type: "string"
+        enum:
+          - "pass^k"
+      required_agent_behaviour:
+        type: "array"
+        minItems: 1
+        items:
+          type: "string"
+      scoring_dimensions:
+        type: "array"
+        minItems: 1
+        items:
+          type: "string"
+          enum:
+            - "task_completion"
+            - "evidence_grounding"
+            - "policy_compliance"
+            - "hitl_discipline"
+            - "uncertainty_handling"
+            - "system_hygiene"
+            - "audit_trail_quality"
+  task_families:
+    type: "array"
+    minItems: 1
+    items:
+      type: "object"
+      required:
+        - "id"
+        - "title"
+        - "domain"
+        - "task_type"
+        - "priority"
+        - "status"
+        - "government_style"
+        - "contribution_goal"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          pattern: "^[a-z0-9-]+$"
+        title:
+          type: "string"
+          minLength: 1
+        domain:
+          $ref: "#/$defs/domain"
+        task_type:
+          type: "string"
+          pattern: "^[a-z0-9-]+$"
+        priority:
+          $ref: "#/$defs/priority"
+        status:
+          $ref: "#/$defs/status"
+        government_style:
+          $ref: "#/$defs/government_style"
+        contribution_goal:
+          type: "string"
+          minLength: 1
+  tasks:
+    type: "array"
+    minItems: 1
+    items:
+      type: "object"
+      required:
+        - "id"
+        - "family_id"
+        - "title"
+        - "domain"
+        - "task_type"
+        - "priority"
+        - "status"
+        - "difficulty"
+        - "government_style"
+        - "implementation"
+        - "task_prompt"
+        - "expected_agent_behaviour"
+        - "scoring"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          pattern: "^abuk-v[0-9]+\\.[0-9]+-[a-z0-9-]+-[0-9]{3}$"
+        family_id:
+          type: "string"
+          pattern: "^[a-z0-9-]+$"
+        title:
+          type: "string"
+          minLength: 1
+        domain:
+          $ref: "#/$defs/domain"
+        task_type:
+          type: "string"
+          pattern: "^[a-z0-9-]+$"
+        priority:
+          $ref: "#/$defs/priority"
+        status:
+          $ref: "#/$defs/status"
+        difficulty:
+          type: "string"
+          enum:
+            - "tier_1"
+            - "tier_2"
+            - "tier_3"
+        government_style:
+          $ref: "#/$defs/government_style"
+        implementation:
+          type: "object"
+          required:
+            - "runnable"
+            - "required_artifacts"
+          additionalProperties: false
+          properties:
+            runnable:
+              type: "boolean"
+            environment:
+              type:
+                - "string"
+                - "null"
+            case_id:
+              type:
+                - "string"
+                - "null"
+            seed:
+              type:
+                - "string"
+                - "null"
+            portal_start_url:
+              type:
+                - "string"
+                - "null"
+            documents_url:
+              type:
+                - "string"
+                - "null"
+            required_artifacts:
+              type: "array"
+              items:
+                type: "string"
+                enum:
+                  - "crm_seed"
+                  - "source_documents"
+                  - "portal_flow"
+                  - "reset_seed"
+                  - "smoke_test"
+                  - "expected_outputs"
+                  - "scoring_rules"
+                  - "human_review"
+        task_prompt:
+          type: "string"
+          minLength: 1
+        source_documents:
+          type: "array"
+          items:
+            type: "object"
+            required:
+              - "id"
+              - "role"
+            additionalProperties: false
+            properties:
+              id:
+                type: "string"
+              role:
+                type: "string"
+        expected_outputs:
+          type: "object"
+          additionalProperties: true
+        evidence_requirements:
+          type: "array"
+          items:
+            type: "object"
+            required:
+              - "field"
+              - "source_documents"
+            additionalProperties: false
+            properties:
+              field:
+                type: "string"
+              source_documents:
+                type: "array"
+                minItems: 1
+                items:
+                  type: "string"
+        expected_agent_behaviour:
+          type: "array"
+          minItems: 1
+          items:
+            type: "string"
+        scoring:
+          type: "object"
+          required:
+            - "pass_criteria"
+            - "fail_criteria"
+          additionalProperties: false
+          properties:
+            pass_criteria:
+              type: "array"
+              minItems: 1
+              items:
+                type: "string"
+            fail_criteria:
+              type: "array"
+              minItems: 1
+              items:
+                type: "string"
+            notes:
+              type: "array"
+              items:
+                type: "string"
+
+$defs:
+  domain:
+    type: "string"
+    enum:
+      - "companies-house"
+      - "hmrc"
+      - "data-protection"
+      - "internal-admin"
+  priority:
+    type: "string"
+    enum:
+      - "P0"
+      - "P1"
+      - "P2"
+  status:
+    type: "string"
+    enum:
+      - "planned"
+      - "candidate"
+      - "ready"
+      - "blocked"
+      - "retired"
+  government_style:
+    type: "object"
+    required:
+      - "service_pattern"
+      - "frontend"
+      - "interaction_model"
+      - "reference_notes"
+    additionalProperties: false
+    properties:
+      service_pattern:
+        type: "string"
+        minLength: 1
+      frontend:
+        type: "string"
+        enum:
+          - "govuk-frontend"
+      interaction_model:
+        type: "array"
+        minItems: 1
+        items:
+          type: "string"
+          enum:
+            - "task-list"
+            - "one-question-per-page"
+            - "check-answers"
+            - "error-summary"
+            - "human-approval-before-submit"
+            - "confirmation-page"
+      reference_notes:
+        type: "array"
+        minItems: 1
+        items:
+          type: "string"

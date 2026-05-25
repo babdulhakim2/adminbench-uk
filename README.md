@@ -43,7 +43,7 @@ Each task gives an agent:
 - A portal environment built on the [GOV.UK Frontend](https://github.com/alphagov/govuk-frontend) component library, running in Docker
 - A mock CRM and audit log
 
-Task definitions for the current benchmark set live in [`tasks/v0.1.yaml`](tasks/v0.1.yaml).
+Task definitions for the current benchmark set live in [`tasks/v0.1.yaml`](tasks/v0.1.yaml). The task schema and contributor guidance live in [`tasks/README.md`](tasks/README.md).
 
 The agent must complete the task correctly, using the right evidence, following the applicable policy, and stopping for human approval before any final submission.
 
@@ -69,6 +69,8 @@ Results are reported using **pass^k** (reliability across repeated trials), not 
 - **HMRC-style** — VAT returns, PAYE processing, corporation tax
 - **Data protection** — ICO breach notifications, GDPR DSARs, right-to-work checks
 - **Internal admin** — supplier onboarding, contract renewal, policy sign-off
+
+The v0.1 catalog tracks all of these task families. Only tasks marked `ready` in the catalog are included in scored runs; `planned` tasks are contribution targets.
 
 ---
 
