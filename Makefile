@@ -1,4 +1,4 @@
-.PHONY: up down reset smoke lock-services
+.PHONY: up down reset smoke evaluate lock-services
 
 up:
 	docker compose up --build
@@ -11,6 +11,9 @@ reset:
 
 smoke:
 	node scripts/smoke-test.mjs
+
+evaluate:
+	python3 scripts/evaluate_run.py
 
 lock-services:
 	npm run lock:services
