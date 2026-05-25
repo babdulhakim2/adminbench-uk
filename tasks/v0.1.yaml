@@ -105,6 +105,7 @@ tasks:
     task_type: "registered-office-change"
     priority: "P0"
     status: "ready"
+    invalid_schema_probe: true
     difficulty: "tier_1"
     government_style:
       service_pattern: "Companies House AD01 filing flow"
