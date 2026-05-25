@@ -1,0 +1,40 @@
+name: Validate evaluation tools
+
+on:
+  pull_request:
+    paths:
+      - "scripts/evaluate_run.py"
+      - "scripts/browsergym_adminbench.py"
+      - "requirements-eval.txt"
+      - ".github/workflows/validate-eval-tools.yml"
+      - "package.json"
+      - "Makefile"
+      - "README.md"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/evaluate_run.py"
+      - "scripts/browsergym_adminbench.py"
+      - "requirements-eval.txt"
+      - ".github/workflows/validate-eval-tools.yml"
+      - "package.json"
+      - "Makefile"
+      - "README.md"
+
+jobs:
+  validate-evaluation-tools:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show Python version
+        run: python3 --version
+
+      - name: Compile evaluation scripts
+        run: python3 -m py_compile scripts/evaluate_run.py scripts/browsergym_adminbench.py
+
+      - name: Check BrowserGym task config
+        run: python3 scripts/browsergym_adminbench.py --print-config --case-id vat-001
