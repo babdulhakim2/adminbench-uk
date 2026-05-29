@@ -76,6 +76,19 @@ The verifier is not the agent. It does not call an LLM and it does not prove tas
 
 The current repo includes the Docker stack, reset protocol, BrowserGym task adapter, and deterministic verifier. Provider-specific GPT, Claude, Gemini, and open-model runners are the next implementation step.
 
+## Benchmark Design Principles
+
+AdminBench follows the strongest patterns from outcome-driven agent benchmarks such as [Terminal-Bench](https://github.com/harbor-framework/terminal-bench), [SWE-bench](https://github.com/swe-bench/SWE-bench), [OSWorld](https://os-world.github.io/), [WorkArena](https://github.com/ServiceNow/WorkArena), [AppWorld](https://appworld.dev/), and [AutomationBench](https://github.com/zapier/AutomationBench):
+
+- **Outcome-first scoring** — score final environment state, not polished prose or self-reported success.
+- **Deterministic verification** — use exact field checks, required audit events, policy checks, and submission state instead of LLM-as-judge for the primary score.
+- **Agent/harness separation** — the model runner controls the browser; the verifier only reads CRM and audit state after the run.
+- **Isolated, resettable tasks** — every trial starts from a known seed, with clean CRM, audit, documents, and portal session state.
+- **Realistic side effects** — tasks should require updates to the same systems a real admin workflow would touch, and should fail when the wrong record, value, or irreversible action is produced.
+- **Traceable failures** — store enough run metadata, browser harness details, audit events, and result JSON to debug why a model failed.
+- **Comparable runs** — report pass^k, cost, step count, duration, and CuP/risk metrics across repeated trials.
+- **Public development, held-out evaluation later** — public tasks should be inspectable and contributable; leaderboard-style results should eventually use private variants from the same task distribution.
+
 ---
 
 ## v0.1 Task Domains
@@ -271,13 +284,16 @@ Each flow has source documents, case-specific form steps, check answers, human a
 - [x] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
 - [x] Automated scoring for the three ready tasks
 - [x] BrowserGym task adapter for browser-agent runs
+- [x] Benchmark design principles aligned with outcome-driven agent benchmarks
+- [ ] Provider-agnostic BrowserGym model runner and result writer
+- [ ] Pass^k, cost, step-count, and duration aggregation
 - [ ] Scoring rubric and human evaluation guide
 - [ ] Human baseline results
 - [ ] arXiv technical note
 
 **v0.2**
 - [ ] Additional task families and distractor variants
-- [ ] Provider-specific GPT, Claude, Gemini, and open-model runners
+- [ ] Held-out task variants for leaderboard-style evaluation
 
 Task design roadmap details are in [`tasks/README.md`](tasks/README.md). New task families should land only when their source documents, seed data, GOV.UK-style UI flow, reset support, smoke test, and expected outputs are ready together.
 
