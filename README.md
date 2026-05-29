@@ -72,7 +72,7 @@ The official AdminBench flow is:
 5. Run the deterministic verifier against CRM and audit state.
 6. Save the JSON result and repeat across seeds/trials for pass^k.
 
-The verifier is not the agent. It does not call an LLM and it does not prove task capability by itself. It only checks the state left behind by a preceding browser-agent run.
+The verifier is not the agent and does not prove task capability by itself. It only checks the state left behind by a preceding browser-agent run.
 
 The current repo includes the Docker stack, reset protocol, BrowserGym task adapter, and deterministic verifier. Provider-specific GPT, Claude, Gemini, and open-model runners are the next implementation step.
 
@@ -81,7 +81,7 @@ The current repo includes the Docker stack, reset protocol, BrowserGym task adap
 AdminBench follows the strongest patterns from outcome-driven agent benchmarks such as [Terminal-Bench](https://github.com/harbor-framework/terminal-bench), [SWE-bench](https://github.com/swe-bench/SWE-bench), [OSWorld](https://os-world.github.io/), [WorkArena](https://github.com/ServiceNow/WorkArena), [AppWorld](https://appworld.dev/), and [AutomationBench](https://github.com/zapier/AutomationBench):
 
 - **Outcome-first scoring** — score final environment state, not polished prose or self-reported success.
-- **Deterministic verification** — use exact field checks, required audit events, policy checks, and submission state instead of LLM-as-judge for the primary score.
+- **Deterministic verification** — use exact field checks, required audit events, policy checks, and submission state for the primary score.
 - **Agent/harness separation** — the model runner controls the browser; the verifier only reads CRM and audit state after the run.
 - **Isolated, resettable tasks** — every trial starts from a known seed, with clean CRM, audit, documents, and portal session state.
 - **Realistic side effects** — tasks should require updates to the same systems a real admin workflow would touch, and should fail when the wrong record, value, or irreversible action is produced.
@@ -150,7 +150,7 @@ npm run evaluate
 
 This command is not a standalone benchmark. It only scores whatever state already exists in the mock CRM and audit sink. A valid AdminBench result requires an LLM-backed agent to run the task first.
 
-The evaluator is Python-based because model runs and browser-agent harnesses are usually orchestrated from Python. LLM agents operate the browser; scoring happens afterwards from deterministic CRM and audit checks. The evaluator does not use an LLM as a judge.
+The evaluator is Python-based because model runs and browser-agent harnesses are usually orchestrated from Python. LLM agents operate the browser; scoring happens afterwards from deterministic CRM and audit checks.
 
 The core output includes:
 

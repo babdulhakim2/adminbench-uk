@@ -47,7 +47,7 @@ We welcome contributions on benchmark design, scoring, and evaluation infrastruc
 
 Open areas:
 - Automated scoring for Evidence Grounding (D2) and Audit Trail Quality (D7)
-- LLM-as-judge design with human audit protocol
+- Deterministic scoring design with human audit protocol
 - ICC analysis tooling for pass^k reliability reporting
 - BrowserGym integration for compatibility with existing agent frameworks
 
