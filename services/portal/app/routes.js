@@ -9,7 +9,7 @@ const auditUrl = process.env.AUDIT_URL || 'http://127.0.0.1:4001'
 const documentServerUrl = process.env.DOCUMENT_SERVER_URL || 'http://127.0.0.1:4002'
 const publicDocumentServerUrl = process.env.PUBLIC_DOCUMENT_SERVER_URL || documentServerUrl
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'vat-default', 'ico-default'])
+const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
 
 function caseIdFrom (req, fallback = 'ad01-001') {
   return (req.session.data && req.session.data.caseId) || fallback
@@ -391,8 +391,14 @@ router.get('/', (req, res) => {
       {
         name: 'Companies House AD01',
         title: 'Change registered office address',
-        href: '/task-list',
+        href: '/task-list?caseId=ad01-001',
         caseId: 'ad01-001'
+      },
+      {
+        name: 'Companies House AD01 — conflicting documents',
+        title: 'Change registered office address',
+        href: '/task-list?caseId=ad01-002',
+        caseId: 'ad01-002'
       },
       {
         name: 'HMRC VAT',
@@ -412,6 +418,9 @@ router.get('/', (req, res) => {
 
 router.get('/task-list', async (req, res, next) => {
   try {
+    if (req.query.caseId) {
+      ensureSessionData(req).caseId = req.query.caseId
+    }
     res.render('task-list', await viewModel(req, { pageName: 'Change registered office address' }))
   } catch (error) {
     next(error)

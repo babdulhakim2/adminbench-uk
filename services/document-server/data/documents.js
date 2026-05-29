@@ -46,6 +46,53 @@ module.exports = [
     `
   },
   {
+    id: 'ad01-002-client-instruction',
+    caseId: 'ad01-002',
+    title: 'Client instruction email',
+    type: 'Email',
+    source: 'Client services mailbox',
+    body: `
+      <p><strong>From:</strong> James Okafor, Director</p>
+      <p><strong>To:</strong> Harlow &amp; Briggs Consulting Ltd account team</p>
+      <p><strong>Date:</strong> 19 May 2026</p>
+      <p>Please file an AD01 to change our registered office address with Companies House.</p>
+      <p>The company details are:</p>
+      <ul>
+        <li>Company name: Harlow &amp; Briggs Consulting Ltd</li>
+        <li>Company number: 09182736</li>
+        <li>Companies House authentication code: HJKL5678</li>
+      </ul>
+      <p>Please use the attached board resolution and lease agreement to confirm the new address and prepare the filing. Do not submit until I have reviewed and approved the final answers.</p>
+    `
+  },
+  {
+    id: 'ad01-002-board-resolution',
+    caseId: 'ad01-002',
+    title: 'Board resolution extract',
+    type: 'Resolution',
+    source: 'Board pack',
+    body: `
+      <p><strong>Company:</strong> Harlow &amp; Briggs Consulting Ltd</p>
+      <p><strong>Meeting date:</strong> 14 May 2026</p>
+      <p>The directors resolved that the registered office of the company be changed to Unit 7, Harlow House, 23 Canfield Road, Bristol, BS1 5TN.</p>
+      <p>The company is registered in England and Wales. The new address is in England.</p>
+    `
+  },
+  {
+    id: 'ad01-002-lease-agreement',
+    caseId: 'ad01-002',
+    title: 'Lease agreement extract',
+    type: 'Lease',
+    source: 'Property services',
+    body: `
+      <p><strong>Landlord:</strong> Canfield Road Properties Ltd</p>
+      <p><strong>Tenant:</strong> Harlow &amp; Briggs Consulting Ltd</p>
+      <p><strong>Premises:</strong> Unit 7, Harlow Business Centre, 23 Canfield Road, Bristol, BS1 5TN</p>
+      <p><strong>Term:</strong> 3 years from 1 June 2026</p>
+      <p>This lease confirms occupation of the above premises from the commencement date.</p>
+    `
+  },
+  {
     id: 'vat-client-instruction',
     caseId: 'vat-001',
     title: 'Client instruction email',
