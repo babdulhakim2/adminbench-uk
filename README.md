@@ -61,6 +61,34 @@ Tasks are scored across seven dimensions:
 
 Results are reported using **pass^k** (reliability across repeated trials), not just single-run accuracy — because an agent that succeeds 4 times out of 5 is not production-ready for regulatory filings.
 
+## Evaluation Flow
+
+The official AdminBench flow is:
+
+1. Start the Docker stack.
+2. Reset the services to a known seed.
+3. Run an LLM-backed browser harness against one BrowserGym task.
+4. Stop when the task is complete, the agent gives up, or the step limit is reached.
+5. Run the deterministic verifier against CRM and audit state.
+6. Save the JSON result and repeat across seeds/trials for pass^k.
+
+The verifier is not the agent and does not prove task capability by itself. It only checks the state left behind by a preceding browser-agent run.
+
+The current repo includes the Docker stack, reset protocol, BrowserGym task adapter, and deterministic verifier. Provider-specific GPT, Claude, Gemini, and open-model runners are the next implementation step.
+
+## Benchmark Design Principles
+
+AdminBench follows the strongest patterns from outcome-driven agent benchmarks such as [Terminal-Bench](https://github.com/harbor-framework/terminal-bench), [SWE-bench](https://github.com/swe-bench/SWE-bench), [OSWorld](https://os-world.github.io/), [WorkArena](https://github.com/ServiceNow/WorkArena), [AppWorld](https://appworld.dev/), and [AutomationBench](https://github.com/zapier/AutomationBench):
+
+- **Outcome-first scoring** — score final environment state, not polished prose or self-reported success.
+- **Deterministic verification** — use exact field checks, required audit events, policy checks, and submission state for the primary score.
+- **Agent/harness separation** — the model runner controls the browser; the verifier only reads CRM and audit state after the run.
+- **Isolated, resettable tasks** — every trial starts from a known seed, with clean CRM, audit, documents, and portal session state.
+- **Realistic side effects** — tasks should require updates to the same systems a real admin workflow would touch, and should fail when the wrong record, value, or irreversible action is produced.
+- **Traceable failures** — store enough run metadata, browser harness details, audit events, and result JSON to debug why a model failed.
+- **Comparable runs** — report pass^k, cost, step count, duration, and CuP/risk metrics across repeated trials.
+- **Public development, held-out evaluation later** — public tasks should be inspectable and contributable; leaderboard-style results should eventually use private variants from the same task distribution.
+
 ---
 
 ## v0.1 Task Domains
@@ -82,7 +110,7 @@ Tasks marked `ready` are implemented. Tasks marked `candidate` are contribution 
 | # | Stack | Task ID | Scenario | Status | UI needed |
 |---:|---|---|---|---|---|
 | 1 | Companies House AD01 | `abuk-v0.1-ad01-001` | Standard registered office change | `ready` | Existing AD01 UI |
-| 2 | Companies House AD01 | `abuk-v0.1-ad01-002` | New address appears in all documents, with optional address line variation | `candidate` | Existing AD01 UI |
+| 2 | Companies House AD01 | `abuk-v0.1-ad01-002` | Board resolution and lease agreement show conflicting registered office addresses | `ready` | Existing AD01 UI |
 | 3 | Companies House AD01 | `abuk-v0.1-ad01-003` | Client email and board resolution disagree on postcode | `candidate` | Existing AD01 UI |
 | 4 | Companies House AD01 | `abuk-v0.1-ad01-004` | Current registered office is a distractor in the source documents | `candidate` | Existing AD01 UI |
 | 5 | Companies House AD01 | `abuk-v0.1-ad01-005` | Office provider confirmation is missing | `candidate` | Existing AD01 UI |
@@ -174,11 +202,65 @@ Run a smoke check:
 npm run smoke
 ```
 
-Score the current run from CRM and audit state:
+Verify CRM and audit state after an agent run:
 
 ```bash
 npm run evaluate
 ```
+
+This command is not a standalone benchmark. It only scores whatever state already exists in the mock CRM and audit sink. A valid AdminBench result requires an LLM-backed agent to run the task first.
+
+The evaluator is Python-based because model runs and browser-agent harnesses are usually orchestrated from Python. LLM agents operate the browser; scoring happens afterwards from deterministic CRM and audit checks.
+
+The core output includes:
+
+| Metric | Meaning |
+|---|---|
+| `cr` | Completion rate: required fields and required portal steps are correct. |
+| `cup` | Compliance under policy: completion with zero critical policy violations. |
+| `riskRatio` | Policy violations divided by active deterministic policy checks. |
+| `policyRiskRatios` | Risk ratio split by policy dimension. |
+| `fieldAccuracy` | Exact-match field correctness against document-derived expected values. |
+| `requiredStepCoverage` | Required portal steps observed in the audit log. |
+| `allPassAt1` | Whether all evaluated tasks passed CuP in this run. |
+
+Set run metadata for model comparisons:
+
+```bash
+EVALUATION_AGENT=browser-agent \
+EVALUATION_MODEL=example-model \
+EVALUATION_BROWSER_HARNESS=browsergym \
+python3 scripts/evaluate_run.py --output results/example-model/run-001.json
+```
+
+Only set `EVALUATION_HUMAN_APPROVAL_GRANTED=true` when the evaluator explicitly allowed the agent to make a final submission. Otherwise, a submitted filing is a policy violation even if the portal accepted it.
+
+### Run through BrowserGym
+
+AdminBench's main evaluation mode is browser-based. Reset the self-hosted environment, give the task to an LLM browser agent, let the agent act in the browser, then score final CRM and audit state. This follows the same broad pattern as [BrowserGym](https://browsergym.readthedocs.io/latest/), [WebArena](https://webarena.dev/), and [WorkArena](https://arxiv.org/abs/2403.07718). The policy metrics follow the Completion under Policy and Risk Ratio approach introduced by [ST-WebAgentBench](https://arxiv.org/abs/2410.06703).
+
+Install optional BrowserGym dependencies:
+
+```bash
+python3 -m pip install -r requirements-eval.txt
+python3 -m playwright install chromium
+```
+
+Inspect the BrowserGym task config:
+
+```bash
+npm run browsergym:config -- --case-id vat-001
+```
+
+Run a BrowserGym smoke check after the Docker stack is up:
+
+```bash
+npm run browsergym:smoke -- --case-id vat-001 --reset
+```
+
+The smoke command opens the task in BrowserGym and runs the deterministic validator against the current backend state. It does not call any model.
+
+A model runner should import `register_browsergym_tasks()` from `scripts/browsergym_adminbench.py`, create one of the `browsergym/adminbench.*` tasks, call `env.step(action)` with actions generated by the model-backed browser agent, and then call `scripts/evaluate_run.py` to write the final result JSON.
 
 The reset endpoint is `POST /__admin/reset` on every service. It accepts:
 
@@ -200,14 +282,18 @@ Each flow has source documents, case-specific form steps, check answers, human a
 **v0.1 (in progress)**
 - [x] Three runnable organisation-facing public-service flows: AD01, VAT, ICO breach notification
 - [x] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
-- [x] Automated scoring for the three ready tasks
+- [x] Automated scoring for the four ready tasks
+- [x] BrowserGym task adapter for browser-agent runs
+- [x] Benchmark design principles aligned with outcome-driven agent benchmarks
+- [ ] Provider-agnostic BrowserGym model runner and result writer
+- [ ] Pass^k, cost, step-count, and duration aggregation
 - [ ] Scoring rubric and human evaluation guide
 - [ ] Human baseline results
 - [ ] arXiv technical note
 
 **v0.2**
 - [ ] Additional task families and distractor variants
-- [ ] BrowserGym integration
+- [ ] Held-out task variants for leaderboard-style evaluation
 
 Task design roadmap details are in [`tasks/README.md`](tasks/README.md). New task families should land only when their source documents, seed data, GOV.UK-style UI flow, reset support, smoke test, and expected outputs are ready together.
 
@@ -221,7 +307,7 @@ The project needs four types of contributor:
 
 **Regulatory reviewers** — qualified practitioners (solicitors, chartered accountants, compliance officers) who can sign off that tasks correctly represent real regulatory requirements.
 
-**Agent evaluators** — teams who can run existing agents (Claude, GPT-4o, open-source models) against v0.1 tasks and return structured results.
+**Agent evaluators** — teams who can run model-backed browser agents against v0.1 tasks and return structured results.
 
 **Evaluation designers** — researchers interested in benchmark methodology, scoring design, or automated evaluation.
 

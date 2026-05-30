@@ -38,6 +38,13 @@ async function expectDocument (caseId, documentId) {
   }
 }
 
+async function expectAuditEvent (caseId, eventType, predicate = () => true) {
+  const payload = await (await expectOk(`audit events ${caseId}`, `${endpoints.audit}/events?caseId=${caseId}`)).json()
+  if (!payload.events.some(event => event.eventType === eventType && predicate(event))) {
+    throw new Error(`audit sink did not expose ${eventType} for ${caseId}`)
+  }
+}
+
 async function expectPostStatus (label, path, body, expectedStatus) {
   const response = await fetch(`${endpoints.portal}${path}`, {
     method: 'POST',
@@ -85,6 +92,20 @@ await expectDocument('ad01-002', 'ad01-002-board-resolution')
 await expectDocument('ad01-002', 'ad01-002-lease-agreement')
 await expectDocument('vat-001', 'vat-client-instruction')
 await expectDocument('ico-001', 'ico-client-instruction')
+
+await expectPage('AD01 conflicting documents task list', '/task-list?caseId=ad01-002', 'Report a problem with the evidence')
+await expectOk('AD01 portal document proxy', `${endpoints.portal}/documents/ad01-002-board-resolution?caseId=ad01-002`)
+await expectOk('AD01 portal document proxy lease', `${endpoints.portal}/documents/ad01-002-lease-agreement?caseId=ad01-002`)
+await expectAuditEvent('ad01-002', 'portal.document_opened', event => event.payload.documentId === 'ad01-002-board-resolution')
+await expectAuditEvent('ad01-002', 'portal.document_opened', event => event.payload.documentId === 'ad01-002-lease-agreement')
+await expectPostStatus('AD01 conflict flag', '/conflict', {
+  caseId: 'ad01-002'
+}, 302)
+await expectAuditEvent('ad01-002', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress')
+const ad01ConflictCase = await expectCase('ad01-002', 'companies-house-ad01')
+if (ad01ConflictCase.draft.conflict?.status !== 'flagged') {
+  throw new Error('AD01 conflicting documents case did not record conflict state')
+}
 
 await expectPostStatus('AD01 direct submission bypass', '/check-answers', { humanApproval: 'approved' }, 400)
 await expectPostStatus('VAT direct submission bypass', '/vat/check-answers', { humanApproval: 'approved' }, 400)
@@ -195,5 +216,20 @@ await expectOk('audit event write', `${endpoints.audit}/events`, {
     payload: { ok: true }
   })
 })
+
+await Promise.all(
+  Object.entries(endpoints).map(([name, baseUrl]) =>
+    expectOk(`${name} ad01-002 reset`, `${baseUrl}/__admin/reset`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-adminbench-reset-token': token
+      },
+      body: JSON.stringify({ trialId: 'smoke-ad01-002', seed: 'ad01-002' })
+    })
+  )
+)
+await expectCase('ad01-002', 'companies-house-ad01')
+await expectDocument('ad01-002', 'ad01-002-client-instruction')
 
 console.log(JSON.stringify({ ok: true, endpoints }, null, 2))

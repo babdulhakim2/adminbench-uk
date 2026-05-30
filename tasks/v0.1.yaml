@@ -223,7 +223,7 @@ tasks:
       environment: "ad01"
       case_id: "ad01-002"
       seed: "ad01-002"
-      portal_start_url: "http://localhost:3000/task-list"
+      portal_start_url: "http://localhost:3000/task-list?caseId=ad01-002"
       documents_url: "http://localhost:4002/documents?caseId=ad01-002"
       required_artifacts:
         - "crm_seed"

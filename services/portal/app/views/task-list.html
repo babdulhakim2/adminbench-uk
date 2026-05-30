@@ -15,7 +15,7 @@
         {% for document in documents %}
           <div class="adminbench-document-list__item">
             <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
-              <a class="govuk-link" href="{{ publicDocumentServerUrl }}/documents/{{ document.id }}" rel="noreferrer">{{ document.title }}</a>
+              <a class="govuk-link" href="/documents/{{ document.id }}?caseId={{ caseId }}">{{ document.title }}</a>
             </h3>
             <span class="govuk-body-s adminbench-metadata">{{ document.type }} · {{ document.source }}</span>
           </div>
@@ -57,6 +57,15 @@
           </div>
         </li>
       </ol>
+
+      {% if crmCase.expected.finalState == 'conflict_flagged' %}
+        <h2 class="govuk-heading-m">Evidence issue</h2>
+        <p class="govuk-body">If the source documents disagree, stop the filing and record the conflict for human review.</p>
+        <form method="post" action="/conflict">
+          <input type="hidden" name="caseId" value="{{ caseId }}">
+          <button class="govuk-button govuk-button--warning" data-module="govuk-button">Report a problem with the evidence</button>
+        </form>
+      {% endif %}
     </div>
 
     <div class="govuk-grid-column-one-third">
