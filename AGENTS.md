@@ -24,3 +24,4 @@ These notes are for AI coding agents and automation working in this repository.
 - List the exact commands run.
 - If a command was not run, say why.
 - For task changes, include schema validation and any relevant smoke or deterministic evaluation checks.
+- For browser-agent runner changes, include `scripts/run_browsergym_eval.py --dry-run` and any live BrowserGym run that was possible in the local environment.

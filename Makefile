@@ -1,4 +1,4 @@
-.PHONY: up down reset smoke evaluate browsergym-config browsergym-smoke lock-services
+.PHONY: up down reset smoke evaluate browsergym-config browsergym-smoke browsergym-run lock-services
 
 up:
 	docker compose up --build
@@ -20,6 +20,9 @@ browsergym-config:
 
 browsergym-smoke:
 	python3 scripts/browsergym_adminbench.py --smoke --headless
+
+browsergym-run:
+	python3 scripts/run_browsergym_eval.py
 
 lock-services:
 	npm run lock:services
