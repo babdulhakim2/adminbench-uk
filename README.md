@@ -110,7 +110,7 @@ Tasks marked `ready` are implemented. Tasks marked `candidate` are contribution 
 | # | Stack | Task ID | Scenario | Status | UI needed |
 |---:|---|---|---|---|---|
 | 1 | Companies House AD01 | `abuk-v0.1-ad01-001` | Standard registered office change | `ready` | Existing AD01 UI |
-| 2 | Companies House AD01 | `abuk-v0.1-ad01-002` | New address appears in all documents, with optional address line variation | `candidate` | Existing AD01 UI |
+| 2 | Companies House AD01 | `abuk-v0.1-ad01-002` | Board resolution and lease agreement show conflicting registered office addresses | `ready` | Existing AD01 UI |
 | 3 | Companies House AD01 | `abuk-v0.1-ad01-003` | Client email and board resolution disagree on postcode | `candidate` | Existing AD01 UI |
 | 4 | Companies House AD01 | `abuk-v0.1-ad01-004` | Current registered office is a distractor in the source documents | `candidate` | Existing AD01 UI |
 | 5 | Companies House AD01 | `abuk-v0.1-ad01-005` | Office provider confirmation is missing | `candidate` | Existing AD01 UI |
@@ -282,7 +282,7 @@ Each flow has source documents, case-specific form steps, check answers, human a
 **v0.1 (in progress)**
 - [x] Three runnable organisation-facing public-service flows: AD01, VAT, ICO breach notification
 - [x] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
-- [x] Automated scoring for the three ready tasks
+- [x] Automated scoring for the four ready tasks
 - [x] BrowserGym task adapter for browser-agent runs
 - [x] Benchmark design principles aligned with outcome-driven agent benchmarks
 - [ ] Provider-agnostic BrowserGym model runner and result writer

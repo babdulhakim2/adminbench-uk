@@ -4,7 +4,7 @@ const documents = require('./data/documents')
 const app = express()
 const port = Number(process.env.PORT || 4002)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'vat-default', 'ico-default'])
+const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
 
 let resetMetadata = {
   trialId: null,
@@ -77,7 +77,9 @@ app.get('/api/documents/:documentId', (req, res) => {
 })
 
 app.get('/documents', (req, res) => {
-  const links = documents
+  const caseId = req.query.caseId
+  const visibleDocuments = caseId ? documents.filter(document => document.caseId === caseId) : documents
+  const links = visibleDocuments
     .map(document => `<li><a href="/documents/${document.id}">${document.title}</a> <span class="meta">${document.type}</span></li>`)
     .join('')
   res.type('html').send(page('Documents', `<h1>Task documents</h1><ul>${links}</ul>`))

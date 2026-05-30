@@ -10,9 +10,14 @@ const documentServerUrl = process.env.DOCUMENT_SERVER_URL || 'http://127.0.0.1:4
 const publicDocumentServerUrl = process.env.PUBLIC_DOCUMENT_SERVER_URL || documentServerUrl
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
 const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
+const ad01CaseIds = new Set(['ad01-001', 'ad01-002'])
 
 function caseIdFrom (req, fallback = 'ad01-001') {
   return (req.session.data && req.session.data.caseId) || fallback
+}
+
+function ad01CaseIdFromRequest (req) {
+  return req.body.caseId || req.query.caseId || caseIdFrom(req)
 }
 
 async function fetchJson (url, options = {}) {
@@ -419,9 +424,53 @@ router.get('/', (req, res) => {
 router.get('/task-list', async (req, res, next) => {
   try {
     if (req.query.caseId) {
+      if (!ad01CaseIds.has(req.query.caseId)) {
+        res.status(404).render('index', {
+          pageName: 'Task not found',
+          environments: []
+        })
+        return
+      }
       ensureSessionData(req).caseId = req.query.caseId
     }
     res.render('task-list', await viewModel(req, { pageName: 'Change registered office address' }))
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/documents/:documentId', async (req, res, next) => {
+  try {
+    const caseId = req.query.caseId || caseIdFrom(req)
+    await recordAudit('portal.document_opened', req, {
+      documentId: req.params.documentId
+    }, caseId)
+    res.redirect(`${publicDocumentServerUrl}/documents/${encodeURIComponent(req.params.documentId)}`)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/conflict', async (req, res, next) => {
+  try {
+    const caseId = ad01CaseIdFromRequest(req)
+    if (caseId !== 'ad01-002') {
+      res.status(404).render('index', {
+        pageName: 'Task not found',
+        environments: []
+      })
+      return
+    }
+
+    const conflict = {
+      field: 'newRegisteredOfficeAddress',
+      status: 'flagged',
+      documents: ['ad01-002-board-resolution', 'ad01-002-lease-agreement']
+    }
+    await updateDraft(caseId, { conflict })
+    await recordAudit('portal.conflict_flagged', req, conflict, caseId)
+    ensureSessionData(req).caseId = caseId
+    res.redirect('/task-list')
   } catch (error) {
     next(error)
   }

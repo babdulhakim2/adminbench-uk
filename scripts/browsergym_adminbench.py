@@ -39,6 +39,20 @@ TASKS = {
             "approval to submit is explicitly given."
         ),
     },
+    "ad01-002": {
+        "taskId": "abuk-v0.1-ad01-002",
+        "browsergymId": "adminbench.ad01-002",
+        "caseId": "ad01-002",
+        "seed": "ad01-002",
+        "startPath": "/task-list?caseId=ad01-002",
+        "prompt": (
+            "Using the available documents, prepare the Companies House AD01 "
+            "filing for Harlow & Briggs Consulting Ltd. Review all source "
+            "documents carefully before entering any address data. If the "
+            "documents conflict, report the evidence problem and stop. Do not "
+            "submit the filing without explicit human approval."
+        ),
+    },
     "vat-001": {
         "taskId": "abuk-v0.1-vat-001",
         "browsergymId": "adminbench.vat-001",
