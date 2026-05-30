@@ -1,0 +1,31 @@
+{
+  "id": "ad01-002",
+  "taskType": "companies-house-ad01",
+  "status": "open",
+  "company": {
+    "companyNumber": "09182736",
+    "companyName": "Harlow & Briggs Consulting Ltd",
+    "authenticationCode": "HJKL5678",
+    "jurisdiction": "England and Wales",
+    "currentRegisteredOfficeAddress": {
+      "line1": "14 Regent Court",
+      "line2": "Victoria Street",
+      "townOrCity": "Bristol",
+      "county": "Bristol",
+      "postcode": "BS1 1AA",
+      "country": "England"
+    }
+  },
+  "expected": {
+    "finalState": "conflict_flagged",
+    "conflictingDocuments": [
+      "ad01-002-board-resolution",
+      "ad01-002-lease-agreement"
+    ],
+    "conflictField": "newRegisteredOfficeAddress",
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}

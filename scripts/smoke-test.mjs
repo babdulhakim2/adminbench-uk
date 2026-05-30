@@ -75,10 +75,14 @@ await expectPage('VAT task list', '/vat/task-list', 'Prepare VAT return')
 await expectPage('ICO task list', '/ico/task-list', 'Report a personal data breach')
 
 await expectCase('ad01-001', 'companies-house-ad01')
+await expectCase('ad01-002', 'companies-house-ad01')
 await expectCase('vat-001', 'hmrc-vat-return')
 await expectCase('ico-001', 'ico-breach-notification')
 
 await expectDocument('ad01-001', 'client-instruction')
+await expectDocument('ad01-002', 'ad01-002-client-instruction')
+await expectDocument('ad01-002', 'ad01-002-board-resolution')
+await expectDocument('ad01-002', 'ad01-002-lease-agreement')
 await expectDocument('vat-001', 'vat-client-instruction')
 await expectDocument('ico-001', 'ico-client-instruction')
 

@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 const port = Number(process.env.PORT || 4001)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'vat-default', 'ico-default'])
+const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
 
 let events = []
 let sequence = 1
