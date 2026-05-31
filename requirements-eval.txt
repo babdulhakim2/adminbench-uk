@@ -1,3 +1,4 @@
 # Optional dependencies for running AdminBench through BrowserGym.
+# Requires Python 3.10 or newer.
 browsergym
 playwright

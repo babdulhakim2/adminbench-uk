@@ -168,6 +168,11 @@ def reset_services(services: ServiceUrls, seed: str, reset_token: str) -> None:
 
 
 def load_browsergym_task_class():
+    if sys.version_info < (3, 10):
+        raise SystemExit(
+            "BrowserGym requires Python 3.10 or newer. Create the eval environment "
+            "with a newer Python before installing requirements-eval.txt."
+        )
     try:
         import playwright.sync_api
         from browsergym.core.task import AbstractBrowserTask
@@ -261,6 +266,11 @@ def register_browsergym_tasks() -> None:
 
 
 def run_smoke(args: argparse.Namespace) -> int:
+    if sys.version_info < (3, 10):
+        raise SystemExit(
+            "BrowserGym requires Python 3.10 or newer. Create the eval environment "
+            "with a newer Python before installing requirements-eval.txt."
+        )
     try:
         from browsergym.core.env import BrowserEnv
     except ImportError as error:
