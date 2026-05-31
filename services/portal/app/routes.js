@@ -73,6 +73,19 @@ function pathForCase (path, caseId) {
   return `${path}${caseQuery(caseId)}`
 }
 
+function conflictFieldOptionsForCase (crmCase) {
+  if (crmCase.expected?.finalState !== 'conflict_flagged') return []
+  const options = [
+    { value: 'newRegisteredOfficeAddress', text: 'New registered office address' },
+    { value: 'newRegisteredOfficeAddress.postcode', text: 'New registered office postcode' }
+  ]
+  const expectedField = crmCase.expected.conflictField
+  if (expectedField && !options.some(option => option.value === expectedField)) {
+    options.push({ value: expectedField, text: expectedField })
+  }
+  return options
+}
+
 function requestedCaseId (req, flow) {
   const config = flowConfig[flow]
   const data = ensureSessionData(req)
@@ -125,6 +138,7 @@ async function viewModelForFlow (req, flow, extras = {}) {
     caseQuery: caseQuery(caseId),
     crmCase,
     documents: documents.documents || [],
+    conflictFieldOptions: conflictFieldOptionsForCase(crmCase),
     publicDocumentServerUrl,
     data: req.session.data || {},
     errors: [],
@@ -500,7 +514,7 @@ router.get('/task-list', async (req, res, next) => {
 
 router.get('/documents/:documentId', async (req, res, next) => {
   try {
-    const caseId = req.query.caseId || caseIdFrom(req)
+    const caseId = req.query.caseId || requestedCaseId(req, 'ad01')
     await recordAudit('portal.document_opened', req, {
       documentId: req.params.documentId
     }, caseId)
@@ -520,10 +534,25 @@ router.post('/conflict', async (req, res, next) => {
       return
     }
 
+    const expectedField = crmCase.expected.conflictField || 'newRegisteredOfficeAddress'
+    const submittedField = textValue(req.body.conflictField)
+    const conflictReason = textValue(req.body.conflictReason)
+
+    if (submittedField !== expectedField) {
+      res.status(400).json({ ok: false, error: 'Conflict field does not match expected conflict' })
+      return
+    }
+
+    if (conflictReason.length < 10) {
+      res.status(400).json({ ok: false, error: 'Conflict reason must describe the evidence problem' })
+      return
+    }
+
     const conflict = {
-      field: crmCase.expected.conflictField || 'newRegisteredOfficeAddress',
+      field: submittedField,
       status: 'flagged',
-      documents: crmCase.expected.conflictingDocuments
+      documents: crmCase.expected.conflictingDocuments,
+      reason: conflictReason
     }
     await updateDraft(caseId, { conflict })
     await recordAudit('portal.conflict_flagged', req, conflict, caseId)

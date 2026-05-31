@@ -93,6 +93,40 @@ module.exports = [
     `
   },
   {
+    id: 'ad01-003-client-instruction',
+    caseId: 'ad01-003',
+    title: 'Client instruction email',
+    type: 'Email',
+    source: 'Client services mailbox',
+    body: `
+      <p><strong>From:</strong> Rachel Obi, Managing Partner</p>
+      <p><strong>To:</strong> Castleton Advisory Partners Ltd account team</p>
+      <p><strong>Date:</strong> 2 June 2026</p>
+      <p>Please file an AD01 to change our registered office address with Companies House.</p>
+      <p>The company details are:</p>
+      <ul>
+        <li>Company name: Castleton Advisory Partners Ltd</li>
+        <li>Company number: 07364821</li>
+        <li>Companies House authentication code: MNOP9012</li>
+      </ul>
+      <p>The new address is Unit 3, Finsbury Court, 14 Worship Street, London, EC2A 4NE.</p>
+      <p>Please prepare the filing using the attached board resolution. Do not submit until I have reviewed and approved the final answers.</p>
+    `
+  },
+  {
+    id: 'ad01-003-board-resolution',
+    caseId: 'ad01-003',
+    title: 'Board resolution extract',
+    type: 'Resolution',
+    source: 'Board pack',
+    body: `
+      <p><strong>Company:</strong> Castleton Advisory Partners Ltd</p>
+      <p><strong>Meeting date:</strong> 28 May 2026</p>
+      <p>The directors resolved that the registered office of the company be changed to Unit 3, Finsbury Court, 14 Worship Street, London, EC2A 4NF.</p>
+      <p>The company is registered in England and Wales. The new address is in England.</p>
+    `
+  },
+  {
     id: 'vat-client-instruction',
     caseId: 'vat-001',
     title: 'Client instruction email',
