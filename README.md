@@ -113,9 +113,12 @@ v0.1 includes three Dockerised task environments in one GOV.UK-styled portal:
 
 | Environment | Portal URL | Case ID | Seed |
 |---|---|---|---|
-| Companies House AD01 registered office address | `http://localhost:3000/task-list` | `ad01-001` | `ad01-default` |
-| HMRC VAT return | `http://localhost:3000/vat/task-list` | `vat-001` | `vat-default` |
-| ICO personal data breach notification | `http://localhost:3000/ico/task-list` | `ico-001` | `ico-default` |
+| Companies House AD01 registered office address | `http://localhost:3000/task-list?caseId=ad01-001` | `ad01-001` | `ad01-default` |
+| Companies House AD01 conflicting documents | `http://localhost:3000/task-list?caseId=ad01-002` | `ad01-002` | `ad01-002` |
+| HMRC VAT return | `http://localhost:3000/vat/task-list?caseId=vat-001` | `vat-001` | `vat-default` |
+| HMRC VAT zero-output variant | `http://localhost:3000/vat/task-list?caseId=vat-002` | `vat-002` | `vat-002` |
+| ICO personal data breach notification | `http://localhost:3000/ico/task-list?caseId=ico-001` | `ico-001` | `ico-default` |
+| ICO low-risk breach variant | `http://localhost:3000/ico/task-list?caseId=ico-002` | `ico-002` | `ico-002` |
 
 Start the stack:
 
@@ -250,7 +253,7 @@ The reset endpoint is `POST /__admin/reset` on every service. It accepts:
 }
 ```
 
-Use `RESET_TOKEN` to override the local default reset token. The default `v0.1-default` seed loads all ready cases. Individual seeds are also available for focused runs: `ad01-default`, `ad01-002`, `vat-default`, and `ico-default`.
+Use `RESET_TOKEN` to override the local default reset token. The default `v0.1-default` seed loads all ready cases. For focused runs, use a case ID as the seed, for example `ad01-002`, `vat-002`, or `ico-002`. Legacy aliases remain available for the canonical cases: `ad01-default`, `vat-default`, and `ico-default`.
 
 Each flow has source documents, case-specific form steps, check answers, human approval, and a simulated submission. Final submission is blocked unless the draft is complete and human approval is confirmed.
 
@@ -261,11 +264,12 @@ Each flow has source documents, case-specific form steps, check answers, human a
 **v0.1 (in progress)**
 - [x] Three runnable organisation-facing public-service flows: AD01, VAT, ICO breach notification
 - [x] Docker environments: Companies House AD01, HMRC VAT, ICO breach notification
-- [x] Automated scoring for the four ready tasks
+- [x] Automated scoring for the ready v0.1 tasks
 - [x] BrowserGym task adapter for browser-agent runs
 - [x] Benchmark design principles aligned with outcome-driven agent benchmarks
 - [x] Provider-agnostic BrowserGym model runner and result writer
 - [x] Pass^k, usage/cost, step-count, and duration aggregation
+- [x] Multi-case support for AD01, VAT, and ICO task variants
 - [ ] Scoring rubric and human evaluation guide
 - [ ] Human baseline results
 - [ ] arXiv technical note

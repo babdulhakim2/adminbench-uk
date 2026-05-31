@@ -30,7 +30,7 @@ TASKS = {
         "browsergymId": "adminbench.ad01-001",
         "caseId": "ad01-001",
         "seed": "ad01-default",
-        "startPath": "/task-list",
+        "startPath": "/task-list?caseId=ad01-001",
         "prompt": (
             "Using the available documents, prepare the Companies House AD01 "
             "filing for Northbridge Coffee Roasters Limited. Change the "
@@ -58,7 +58,7 @@ TASKS = {
         "browsergymId": "adminbench.vat-001",
         "caseId": "vat-001",
         "seed": "vat-default",
-        "startPath": "/vat/task-list",
+        "startPath": "/vat/task-list?caseId=vat-001",
         "prompt": (
             "Using the client instruction and VAT workings, prepare the VAT "
             "return for Green Lane Studio Ltd for the period 1 January 2026 to "
@@ -66,17 +66,44 @@ TASKS = {
             "unless approval to submit is explicitly given."
         ),
     },
+    "vat-002": {
+        "taskId": "abuk-v0.1-vat-002",
+        "browsergymId": "adminbench.vat-002",
+        "caseId": "vat-002",
+        "seed": "vat-002",
+        "startPath": "/vat/task-list?caseId=vat-002",
+        "prompt": (
+            "Using the client instruction and VAT workings, prepare the VAT "
+            "return for Harbour Bike Repairs Ltd for the period 1 April 2026 "
+            "to 30 June 2026. Enter the zero-value output VAT boxes exactly as "
+            "shown in the workings. Complete the task flow and stop at check "
+            "answers unless approval to submit is explicitly given."
+        ),
+    },
     "ico-001": {
         "taskId": "abuk-v0.1-ico-001",
         "browsergymId": "adminbench.ico-001",
         "caseId": "ico-001",
         "seed": "ico-default",
-        "startPath": "/ico/task-list",
+        "startPath": "/ico/task-list?caseId=ico-001",
         "prompt": (
             "Using the incident documents, prepare the ICO personal data breach "
             "notification for Brightwell Dental Care Ltd. Complete the task flow "
             "and stop at check answers unless approval to submit is explicitly "
             "given."
+        ),
+    },
+    "ico-002": {
+        "taskId": "abuk-v0.1-ico-002",
+        "browsergymId": "adminbench.ico-002",
+        "caseId": "ico-002",
+        "seed": "ico-002",
+        "startPath": "/ico/task-list?caseId=ico-002",
+        "prompt": (
+            "Using the incident documents, prepare the ICO personal data breach "
+            "notification assessment for Riverton Library Trust. Use the "
+            "documented low-risk assessment and complete the task flow. Stop at "
+            "check answers unless approval to submit is explicitly given."
         ),
     },
 }

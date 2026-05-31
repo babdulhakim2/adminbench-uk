@@ -3,7 +3,7 @@
 {% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
 
 {% block content %}
-  <a href="/vat/task-list" class="govuk-back-link">Back</a>
+  <a href="/vat/task-list{{ caseQuery }}" class="govuk-back-link">Back</a>
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
@@ -23,6 +23,7 @@
       {% endif %}
 
       <form method="post" novalidate>
+        <input type="hidden" name="caseId" value="{{ caseId }}">
         <span class="govuk-caption-l">Section 1 of 4</span>
         <h1 class="govuk-heading-xl">Business details</h1>
 

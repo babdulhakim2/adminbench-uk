@@ -86,7 +86,7 @@ The current GOV.UK-style UI can support a broad variant set across the existing 
 | VAT return | 15+ tasks | nine-box figures, zero-value boxes, ledger distractors, period-key distractors, MTD export conflicts, estimated-figure blockers |
 | ICO breach notification | 15+ tasks | breach timings, affected counts, data categories, special-category data, risk level, containment actions, notification status |
 
-The current UI is **not** enough for structurally different services. It is enough for more benchmark tasks only when they are variants of AD01, VAT, and ICO breach notification. To make those variants runnable, the next infrastructure step is to support multiple case IDs per flow instead of the current single default case per flow.
+The current UI is **not** enough for structurally different services. It is enough for more benchmark tasks only when they are variants of AD01, VAT, and ICO breach notification. Multiple case IDs are supported for each flow, so contributors can add same-shape variants by adding a CRM seed, source documents, task catalog entry, expected outputs, and scoring coverage.
 
 ### v0.1 Task Inventory
 
@@ -114,7 +114,7 @@ Tasks marked `ready` are implemented. Tasks marked `candidate` are contribution 
 | 14 | Companies House AD01 | `abuk-v0.1-ad01-014` | New address has county and line-2 details only in the lease | `candidate` | Existing AD01 UI |
 | 15 | Companies House AD01 | `abuk-v0.1-ad01-015` | Appropriate-office evidence is ambiguous and needs escalation | `candidate` | Existing AD01 UI |
 | 16 | HMRC VAT | `abuk-v0.1-vat-001` | Standard VAT return from prepared workings | `ready` | Existing VAT UI |
-| 17 | HMRC VAT | `abuk-v0.1-vat-002` | Zero-rated period with zero-value output boxes | `candidate` | Existing VAT UI |
+| 17 | HMRC VAT | `abuk-v0.1-vat-002` | Zero-rated period with zero-value output boxes | `ready` | Existing VAT UI |
 | 18 | HMRC VAT | `abuk-v0.1-vat-003` | Ledger contains draft figures and final figures | `candidate` | Existing VAT UI |
 | 19 | HMRC VAT | `abuk-v0.1-vat-004` | Period key in client email conflicts with workings | `candidate` | Existing VAT UI |
 | 20 | HMRC VAT | `abuk-v0.1-vat-005` | Box 5 is a repayment rather than an amount payable | `candidate` | Existing VAT UI |
@@ -129,7 +129,7 @@ Tasks marked `ready` are implemented. Tasks marked `candidate` are contribution 
 | 29 | HMRC VAT | `abuk-v0.1-vat-014` | Postponed import VAT is included in the prepared workings | `candidate` | Existing VAT UI |
 | 30 | HMRC VAT | `abuk-v0.1-vat-015` | Bad debt relief appears in final prepared figures | `candidate` | Existing VAT UI |
 | 31 | ICO breach notification | `abuk-v0.1-ico-001` | Standard personal data breach notification | `ready` | Existing ICO UI |
-| 32 | ICO breach notification | `abuk-v0.1-ico-002` | Low-risk breach where notification may not be required | `candidate` | Existing ICO UI |
+| 32 | ICO breach notification | `abuk-v0.1-ico-002` | Low-risk breach with documented low likely risk | `ready` | Existing ICO UI |
 | 33 | ICO breach notification | `abuk-v0.1-ico-003` | High-risk breach with delayed awareness date | `candidate` | Existing ICO UI |
 | 34 | ICO breach notification | `abuk-v0.1-ico-004` | Affected individual count is approximate | `candidate` | Existing ICO UI |
 | 35 | ICO breach notification | `abuk-v0.1-ico-005` | Special category data is present | `candidate` | Existing ICO UI |

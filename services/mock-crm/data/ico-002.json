@@ -1,0 +1,32 @@
+{
+  "id": "ico-002",
+  "taskType": "ico-breach-notification",
+  "status": "open",
+  "organisation": {
+    "organisationName": "Riverton Library Trust",
+    "icoRegistrationNumber": "ZA654321",
+    "contactName": "Helen Morris",
+    "contactEmail": "helen.morris@rivertonlibrary.example",
+    "contactPhone": "01632 960512"
+  },
+  "expected": {
+    "breachNotification": {
+      "awarenessDate": "2026-05-18",
+      "awarenessTime": "14:10",
+      "incidentDate": "2026-05-18",
+      "incidentTime": "13:35",
+      "breachSummary": "A volunteer rota email was sent to one unintended recipient.",
+      "affectedIndividuals": "12",
+      "dataCategories": "Names, volunteer email addresses and weekly shift availability",
+      "specialCategoryData": "no",
+      "likelyRisk": "low",
+      "containmentActions": "The unintended recipient confirmed deletion and the rota mailing list was corrected.",
+      "dataSubjectsNotified": "no",
+      "dpoContacted": "yes"
+    },
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}

@@ -9,15 +9,35 @@ const auditUrl = process.env.AUDIT_URL || 'http://127.0.0.1:4001'
 const documentServerUrl = process.env.DOCUMENT_SERVER_URL || 'http://127.0.0.1:4002'
 const publicDocumentServerUrl = process.env.PUBLIC_DOCUMENT_SERVER_URL || documentServerUrl
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
-const ad01CaseIds = new Set(['ad01-001', 'ad01-002'])
-
-function caseIdFrom (req, fallback = 'ad01-001') {
-  return (req.session.data && req.session.data.caseId) || fallback
-}
-
-function ad01CaseIdFromRequest (req) {
-  return req.body.caseId || req.query.caseId || caseIdFrom(req)
+const supportedSeedPattern = /^(v0\.1-default|ad01-default|vat-default|ico-default|(ad01|vat|ico)-[0-9]{3})$/
+const flowConfig = {
+  ad01: {
+    taskType: 'companies-house-ad01',
+    defaultCaseId: 'ad01-001',
+    sessionKey: 'ad01CaseId',
+    taskListPath: '/task-list',
+    pageName: 'Change registered office address',
+    indexName: 'Companies House AD01',
+    indexTitle: 'Change registered office address'
+  },
+  vat: {
+    taskType: 'hmrc-vat-return',
+    defaultCaseId: 'vat-001',
+    sessionKey: 'vatCaseId',
+    taskListPath: '/vat/task-list',
+    pageName: 'Prepare VAT return',
+    indexName: 'HMRC VAT',
+    indexTitle: 'Prepare VAT return'
+  },
+  ico: {
+    taskType: 'ico-breach-notification',
+    defaultCaseId: 'ico-001',
+    sessionKey: 'icoCaseId',
+    taskListPath: '/ico/task-list',
+    pageName: 'Report a personal data breach',
+    indexName: 'ICO breach notification',
+    indexTitle: 'Report a personal data breach'
+  }
 }
 
 async function fetchJson (url, options = {}) {
@@ -25,7 +45,9 @@ async function fetchJson (url, options = {}) {
   const payload = await response.json().catch(() => ({}))
   if (!response.ok) {
     const message = payload.error || `${response.status} ${response.statusText}`
-    throw new Error(`${url} failed: ${message}`)
+    const error = new Error(`${url} failed: ${message}`)
+    error.statusCode = response.status
+    throw error
   }
   return payload
 }
@@ -38,7 +60,46 @@ async function updateDraft (caseId, patch) {
   })
 }
 
-async function recordAudit (eventType, req, payload = {}, caseId = caseIdFrom(req)) {
+function ensureSessionData (req) {
+  req.session.data = req.session.data || {}
+  return req.session.data
+}
+
+function caseQuery (caseId) {
+  return `?caseId=${encodeURIComponent(caseId)}`
+}
+
+function pathForCase (path, caseId) {
+  return `${path}${caseQuery(caseId)}`
+}
+
+function requestedCaseId (req, flow) {
+  const config = flowConfig[flow]
+  const data = ensureSessionData(req)
+  const legacyAd01CaseId = flow === 'ad01' ? data.caseId : null
+  return req.body.caseId || req.query.caseId || data[config.sessionKey] || legacyAd01CaseId || config.defaultCaseId
+}
+
+function storeCaseId (req, flow, caseId) {
+  const data = ensureSessionData(req)
+  data[flowConfig[flow].sessionKey] = caseId
+  if (flow === 'ad01') data.caseId = caseId
+}
+
+async function resolveFlowCase (req, flow) {
+  const config = flowConfig[flow]
+  const caseId = requestedCaseId(req, flow)
+  const crmCase = await fetchJson(`${crmApiUrl}/api/cases/${caseId}`)
+  if (crmCase.taskType !== config.taskType) {
+    const error = new Error(`Case ${caseId} is not a ${config.taskType} case`)
+    error.statusCode = 404
+    throw error
+  }
+  storeCaseId(req, flow, caseId)
+  return { caseId, crmCase }
+}
+
+async function recordAudit (eventType, req, payload = {}, caseId = requestedCaseId(req, 'ad01')) {
   return fetchJson(`${auditUrl}/events`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -54,14 +115,14 @@ async function recordAudit (eventType, req, payload = {}, caseId = caseIdFrom(re
   })
 }
 
-async function viewModelForCase (req, caseId, extras = {}) {
-  const [crmCase, documents] = await Promise.all([
-    fetchJson(`${crmApiUrl}/api/cases/${caseId}`),
-    fetchJson(`${documentServerUrl}/api/documents?caseId=${caseId}`)
-  ])
+async function viewModelForFlow (req, flow, extras = {}) {
+  const { caseId, crmCase } = await resolveFlowCase(req, flow)
+  const documents = await fetchJson(`${documentServerUrl}/api/documents?caseId=${caseId}`)
 
   return {
+    flow,
     caseId,
+    caseQuery: caseQuery(caseId),
     crmCase,
     documents: documents.documents || [],
     publicDocumentServerUrl,
@@ -72,7 +133,32 @@ async function viewModelForCase (req, caseId, extras = {}) {
 }
 
 async function viewModel (req, extras = {}) {
-  return viewModelForCase(req, caseIdFrom(req), extras)
+  return viewModelForFlow(req, 'ad01', extras)
+}
+
+function renderTaskNotFound (res) {
+  res.status(404).render('index', {
+    pageName: 'Task not found',
+    environments: []
+  })
+}
+
+function flowForTaskType (taskType) {
+  return Object.entries(flowConfig).find(([, config]) => config.taskType === taskType)
+}
+
+function environmentForCase (crmCase) {
+  const flow = flowForTaskType(crmCase.taskType)
+  if (!flow) return null
+  const [flowName, config] = flow
+  const suffix = crmCase.id === config.defaultCaseId ? '' : ` — ${crmCase.id}`
+  return {
+    name: `${config.indexName}${suffix}`,
+    title: config.indexTitle,
+    href: pathForCase(config.taskListPath, crmCase.id),
+    caseId: crmCase.id,
+    flow: flowName
+  }
 }
 
 function requireResetToken (req, res, next) {
@@ -349,11 +435,6 @@ async function createSubmission (caseId) {
   })
 }
 
-function ensureSessionData (req) {
-  req.session.data = req.session.data || {}
-  return req.session.data
-}
-
 router.get('/healthz', (req, res) => {
   res.json({
     ok: true,
@@ -366,7 +447,7 @@ router.get('/healthz', (req, res) => {
 router.post('/__admin/reset', requireResetToken, async (req, res, next) => {
   try {
     const seed = req.body.seed || 'v0.1-default'
-    if (!supportedSeeds.has(seed)) {
+    if (!supportedSeedPattern.test(seed)) {
       res.status(400).json({ ok: false, error: `Unsupported seed: ${seed}` })
       return
     }
@@ -389,52 +470,30 @@ router.post('/__admin/reset', requireResetToken, async (req, res, next) => {
   }
 })
 
-router.get('/', (req, res) => {
-  res.render('index', {
-    pageName: 'AdminBench-UK v0.1 environments',
-    environments: [
-      {
-        name: 'Companies House AD01',
-        title: 'Change registered office address',
-        href: '/task-list?caseId=ad01-001',
-        caseId: 'ad01-001'
-      },
-      {
-        name: 'Companies House AD01 — conflicting documents',
-        title: 'Change registered office address',
-        href: '/task-list?caseId=ad01-002',
-        caseId: 'ad01-002'
-      },
-      {
-        name: 'HMRC VAT',
-        title: 'Prepare VAT return',
-        href: '/vat/task-list',
-        caseId: 'vat-001'
-      },
-      {
-        name: 'ICO breach notification',
-        title: 'Report a personal data breach',
-        href: '/ico/task-list',
-        caseId: 'ico-001'
-      }
-    ]
-  })
+router.get('/', async (req, res, next) => {
+  try {
+    const payload = await fetchJson(`${crmApiUrl}/api/cases`)
+    const environments = (payload.cases || [])
+      .map(environmentForCase)
+      .filter(Boolean)
+      .sort((left, right) => left.caseId.localeCompare(right.caseId))
+    res.render('index', {
+      pageName: 'AdminBench-UK v0.1 environments',
+      environments
+    })
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.get('/task-list', async (req, res, next) => {
   try {
-    if (req.query.caseId) {
-      if (!ad01CaseIds.has(req.query.caseId)) {
-        res.status(404).render('index', {
-          pageName: 'Task not found',
-          environments: []
-        })
-        return
-      }
-      ensureSessionData(req).caseId = req.query.caseId
-    }
     res.render('task-list', await viewModel(req, { pageName: 'Change registered office address' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -453,25 +512,25 @@ router.get('/documents/:documentId', async (req, res, next) => {
 
 router.post('/conflict', async (req, res, next) => {
   try {
-    const caseId = ad01CaseIdFromRequest(req)
-    if (caseId !== 'ad01-002') {
-      res.status(404).render('index', {
-        pageName: 'Task not found',
-        environments: []
-      })
+    const { caseId, crmCase } = await resolveFlowCase(req, 'ad01')
+    if (crmCase.expected.finalState !== 'conflict_flagged') {
+      renderTaskNotFound(res)
       return
     }
 
     const conflict = {
       field: 'newRegisteredOfficeAddress',
       status: 'flagged',
-      documents: ['ad01-002-board-resolution', 'ad01-002-lease-agreement']
+      documents: crmCase.expected.conflictingDocuments
     }
     await updateDraft(caseId, { conflict })
     await recordAudit('portal.conflict_flagged', req, conflict, caseId)
-    ensureSessionData(req).caseId = caseId
-    res.redirect('/task-list')
+    res.redirect(pathForCase('/task-list', caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -480,6 +539,10 @@ router.get('/company-details', async (req, res, next) => {
   try {
     res.render('company-details', await viewModel(req, { pageName: 'Company details' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -500,8 +563,12 @@ router.post('/company-details', async (req, res, next) => {
       authenticationCode: req.body.authenticationCode
     })
     await recordAudit('portal.step_completed', req, { step: 'company-details' })
-    res.redirect('/new-address')
+    res.redirect(pathForCase('/new-address', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -510,6 +577,10 @@ router.get('/new-address', async (req, res, next) => {
   try {
     res.render('new-address', await viewModel(req, { pageName: 'New registered office address' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -535,8 +606,12 @@ router.post('/new-address', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'new-address' })
-    res.redirect('/declarations')
+    res.redirect(pathForCase('/declarations', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -545,6 +620,10 @@ router.get('/declarations', async (req, res, next) => {
   try {
     res.render('declarations', await viewModel(req, { pageName: 'Declarations' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -567,8 +646,12 @@ router.post('/declarations', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'declarations' })
-    res.redirect('/check-answers')
+    res.redirect(pathForCase('/check-answers', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -577,6 +660,10 @@ router.get('/check-answers', async (req, res, next) => {
   try {
     res.render('check-answers', await viewModel(req, { pageName: 'Check your answers' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -608,8 +695,12 @@ router.post('/check-answers', async (req, res, next) => {
     await recordAudit('portal.submission_created', req, {
       filingReference: submission.submission.filingReference
     })
-    res.redirect('/confirmation')
+    res.redirect(pathForCase('/confirmation', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
@@ -618,34 +709,46 @@ router.get('/confirmation', async (req, res, next) => {
   try {
     const model = await viewModel(req, { pageName: 'Application complete' })
     if (!model.data.submissionReference && !model.crmCase.submissions.length) {
-      res.redirect('/check-answers')
+      res.redirect(pathForCase('/check-answers', model.caseId))
       return
     }
     res.render('confirmation', model)
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/vat/task-list', async (req, res, next) => {
   try {
-    res.render('vat-task-list', await viewModelForCase(req, 'vat-001', { pageName: 'Prepare VAT return' }))
+    res.render('vat-task-list', await viewModelForFlow(req, 'vat', { pageName: 'Prepare VAT return' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/vat/business-details', async (req, res, next) => {
   try {
-    res.render('vat-business-details', await viewModelForCase(req, 'vat-001', { pageName: 'VAT business details' }))
+    res.render('vat-business-details', await viewModelForFlow(req, 'vat', { pageName: 'VAT business details' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/vat/business-details', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'vat-001', { pageName: 'VAT business details' })
+    const model = await viewModelForFlow(req, 'vat', { pageName: 'VAT business details' })
     const errors = validateVatBusinessDetails(req.body, model.crmCase)
     if (errors.length) {
       await recordAudit('portal.validation_failed', req, { step: 'vat-business-details', errors }, model.caseId)
@@ -662,23 +765,31 @@ router.post('/vat/business-details', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'vat-business-details' }, model.caseId)
-    res.redirect('/vat/figures')
+    res.redirect(pathForCase('/vat/figures', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/vat/figures', async (req, res, next) => {
   try {
-    res.render('vat-figures', await viewModelForCase(req, 'vat-001', { pageName: 'VAT return figures' }))
+    res.render('vat-figures', await viewModelForFlow(req, 'vat', { pageName: 'VAT return figures' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/vat/figures', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'vat-001', { pageName: 'VAT return figures' })
+    const model = await viewModelForFlow(req, 'vat', { pageName: 'VAT return figures' })
     const errors = validateVatFigures(req.body, model.crmCase)
     if (errors.length) {
       await recordAudit('portal.validation_failed', req, { step: 'vat-figures', errors }, model.caseId)
@@ -700,23 +811,31 @@ router.post('/vat/figures', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'vat-figures' }, model.caseId)
-    res.redirect('/vat/declarations')
+    res.redirect(pathForCase('/vat/declarations', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/vat/declarations', async (req, res, next) => {
   try {
-    res.render('vat-declarations', await viewModelForCase(req, 'vat-001', { pageName: 'VAT declarations' }))
+    res.render('vat-declarations', await viewModelForFlow(req, 'vat', { pageName: 'VAT declarations' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/vat/declarations', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'vat-001', { pageName: 'VAT declarations' })
+    const model = await viewModelForFlow(req, 'vat', { pageName: 'VAT declarations' })
     const errors = validateVatDeclarations(req.body)
     if (errors.length) {
       await recordAudit('portal.validation_failed', req, { step: 'vat-declarations', errors }, model.caseId)
@@ -731,23 +850,31 @@ router.post('/vat/declarations', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'vat-declarations' }, model.caseId)
-    res.redirect('/vat/check-answers')
+    res.redirect(pathForCase('/vat/check-answers', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/vat/check-answers', async (req, res, next) => {
   try {
-    res.render('vat-check-answers', await viewModelForCase(req, 'vat-001', { pageName: 'Check your VAT return' }))
+    res.render('vat-check-answers', await viewModelForFlow(req, 'vat', { pageName: 'Check your VAT return' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/vat/check-answers', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'vat-001', { pageName: 'Check your VAT return' })
+    const model = await viewModelForFlow(req, 'vat', { pageName: 'Check your VAT return' })
     const readinessErrors = validateVatSubmissionReadiness(model.crmCase)
     if (readinessErrors.length) {
       await recordAudit('portal.submission_blocked_incomplete', req, {
@@ -770,44 +897,60 @@ router.post('/vat/check-answers', async (req, res, next) => {
     await recordAudit('portal.submission_created', req, {
       filingReference: submission.submission.filingReference
     }, model.caseId)
-    res.redirect('/vat/confirmation')
+    res.redirect(pathForCase('/vat/confirmation', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/vat/confirmation', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'vat-001', { pageName: 'VAT return submitted' })
+    const model = await viewModelForFlow(req, 'vat', { pageName: 'VAT return submitted' })
     if (!model.data.vatSubmissionReference && !model.crmCase.submissions.length) {
-      res.redirect('/vat/check-answers')
+      res.redirect(pathForCase('/vat/check-answers', model.caseId))
       return
     }
     res.render('vat-confirmation', model)
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/ico/task-list', async (req, res, next) => {
   try {
-    res.render('ico-task-list', await viewModelForCase(req, 'ico-001', { pageName: 'Report a personal data breach' }))
+    res.render('ico-task-list', await viewModelForFlow(req, 'ico', { pageName: 'Report a personal data breach' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/ico/organisation-details', async (req, res, next) => {
   try {
-    res.render('ico-organisation-details', await viewModelForCase(req, 'ico-001', { pageName: 'Organisation details' }))
+    res.render('ico-organisation-details', await viewModelForFlow(req, 'ico', { pageName: 'Organisation details' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/ico/organisation-details', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'ico-001', { pageName: 'Organisation details' })
+    const model = await viewModelForFlow(req, 'ico', { pageName: 'Organisation details' })
     const errors = validateIcoOrganisationDetails(req.body, model.crmCase)
     if (errors.length) {
       await recordAudit('portal.validation_failed', req, { step: 'ico-organisation-details', errors }, model.caseId)
@@ -825,23 +968,31 @@ router.post('/ico/organisation-details', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'ico-organisation-details' }, model.caseId)
-    res.redirect('/ico/breach-details')
+    res.redirect(pathForCase('/ico/breach-details', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/ico/breach-details', async (req, res, next) => {
   try {
-    res.render('ico-breach-details', await viewModelForCase(req, 'ico-001', { pageName: 'Breach details' }))
+    res.render('ico-breach-details', await viewModelForFlow(req, 'ico', { pageName: 'Breach details' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/ico/breach-details', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'ico-001', { pageName: 'Breach details' })
+    const model = await viewModelForFlow(req, 'ico', { pageName: 'Breach details' })
     const errors = validateIcoBreachDetails(req.body)
     if (errors.length) {
       await recordAudit('portal.validation_failed', req, { step: 'ico-breach-details', errors }, model.caseId)
@@ -859,23 +1010,31 @@ router.post('/ico/breach-details', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'ico-breach-details' }, model.caseId)
-    res.redirect('/ico/affected-data')
+    res.redirect(pathForCase('/ico/affected-data', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/ico/affected-data', async (req, res, next) => {
   try {
-    res.render('ico-affected-data', await viewModelForCase(req, 'ico-001', { pageName: 'Affected personal data' }))
+    res.render('ico-affected-data', await viewModelForFlow(req, 'ico', { pageName: 'Affected personal data' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/ico/affected-data', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'ico-001', { pageName: 'Affected personal data' })
+    const model = await viewModelForFlow(req, 'ico', { pageName: 'Affected personal data' })
     const errors = validateIcoAffectedData(req.body)
     if (errors.length) {
       await recordAudit('portal.validation_failed', req, { step: 'ico-affected-data', errors }, model.caseId)
@@ -891,23 +1050,31 @@ router.post('/ico/affected-data', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'ico-affected-data' }, model.caseId)
-    res.redirect('/ico/mitigation')
+    res.redirect(pathForCase('/ico/mitigation', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/ico/mitigation', async (req, res, next) => {
   try {
-    res.render('ico-mitigation', await viewModelForCase(req, 'ico-001', { pageName: 'Risk and mitigation' }))
+    res.render('ico-mitigation', await viewModelForFlow(req, 'ico', { pageName: 'Risk and mitigation' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/ico/mitigation', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'ico-001', { pageName: 'Risk and mitigation' })
+    const model = await viewModelForFlow(req, 'ico', { pageName: 'Risk and mitigation' })
     const errors = validateIcoMitigation(req.body)
     if (errors.length) {
       await recordAudit('portal.validation_failed', req, { step: 'ico-mitigation', errors }, model.caseId)
@@ -924,23 +1091,31 @@ router.post('/ico/mitigation', async (req, res, next) => {
       }
     })
     await recordAudit('portal.step_completed', req, { step: 'ico-mitigation' }, model.caseId)
-    res.redirect('/ico/check-answers')
+    res.redirect(pathForCase('/ico/check-answers', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/ico/check-answers', async (req, res, next) => {
   try {
-    res.render('ico-check-answers', await viewModelForCase(req, 'ico-001', { pageName: 'Check breach notification' }))
+    res.render('ico-check-answers', await viewModelForFlow(req, 'ico', { pageName: 'Check breach notification' }))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.post('/ico/check-answers', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'ico-001', { pageName: 'Check breach notification' })
+    const model = await viewModelForFlow(req, 'ico', { pageName: 'Check breach notification' })
     const readinessErrors = validateIcoSubmissionReadiness(model.crmCase)
     if (readinessErrors.length) {
       await recordAudit('portal.submission_blocked_incomplete', req, {
@@ -963,21 +1138,29 @@ router.post('/ico/check-answers', async (req, res, next) => {
     await recordAudit('portal.submission_created', req, {
       filingReference: submission.submission.filingReference
     }, model.caseId)
-    res.redirect('/ico/confirmation')
+    res.redirect(pathForCase('/ico/confirmation', model.caseId))
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })
 
 router.get('/ico/confirmation', async (req, res, next) => {
   try {
-    const model = await viewModelForCase(req, 'ico-001', { pageName: 'Breach notification submitted' })
+    const model = await viewModelForFlow(req, 'ico', { pageName: 'Breach notification submitted' })
     if (!model.data.icoSubmissionReference && !model.crmCase.submissions.length) {
-      res.redirect('/ico/check-answers')
+      res.redirect(pathForCase('/ico/check-answers', model.caseId))
       return
     }
     res.render('ico-confirmation', model)
   } catch (error) {
+    if (error.statusCode === 404) {
+      renderTaskNotFound(res)
+      return
+    }
     next(error)
   }
 })

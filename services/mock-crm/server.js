@@ -1,19 +1,25 @@
 const express = require('express')
-const ad01Case = require('./data/ad01-default.json')
-const ad01Case002 = require('./data/ad01-002.json')
-const vatCase = require('./data/vat-default.json')
-const icoCase = require('./data/ico-default.json')
+const fs = require('fs')
+const path = require('path')
 
 const app = express()
 const port = Number(process.env.PORT || 4000)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const seedFixtures = {
-  'v0.1-default': [ad01Case, ad01Case002, vatCase, icoCase],
-  'ad01-default': [ad01Case],
-  'ad01-002': [ad01Case002],
-  'vat-default': [vatCase],
-  'ico-default': [icoCase]
+
+function loadFixtures () {
+  const dataDir = path.join(__dirname, 'data')
+  return fs.readdirSync(dataDir)
+    .filter(fileName => fileName.endsWith('.json'))
+    .map(fileName => {
+      const fixture = require(path.join(dataDir, fileName))
+      return { fileName, seedName: path.basename(fileName, '.json'), fixture }
+    })
+    .sort((left, right) => left.fixture.id.localeCompare(right.fixture.id))
 }
+
+const loadedFixtures = loadFixtures()
+const fixturesByCaseId = new Map(loadedFixtures.map(({ fixture }) => [fixture.id, fixture]))
+const seedAliases = new Map(loadedFixtures.map(({ seedName, fixture }) => [seedName, fixture.id]))
 
 let cases
 let submissionSequence
@@ -23,11 +29,19 @@ function clone (value) {
   return JSON.parse(JSON.stringify(value))
 }
 
-function resetState ({ trialId = null, seed = 'v0.1-default' } = {}) {
-  const fixtures = seedFixtures[seed]
-  if (!fixtures) {
+function fixturesForSeed (seed) {
+  if (seed === 'v0.1-default') return loadedFixtures.map(({ fixture }) => fixture)
+
+  const caseId = seedAliases.get(seed) || seed
+  const fixture = fixturesByCaseId.get(caseId)
+  if (!fixture) {
     throw new Error(`Unsupported seed: ${seed}`)
   }
+  return [fixture]
+}
+
+function resetState ({ trialId = null, seed = 'v0.1-default' } = {}) {
+  const fixtures = fixturesForSeed(seed)
 
   cases = new Map(fixtures.map(crmCase => [crmCase.id, clone(crmCase)]))
   submissionSequence = 1

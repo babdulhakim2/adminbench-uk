@@ -195,7 +195,7 @@ def fill_fields(page: Any, values: dict[str, str]) -> None:
 
 def scripted_ad01_001(page: Any) -> list[dict[str, Any]]:
     steps = []
-    page.click('a[href="/company-details"]')
+    page.get_by_role("link", name="Company details").click()
     fill_fields(
         page,
         {
@@ -240,24 +240,15 @@ def scripted_ad01_002(page: Any, portal_url: str) -> list[dict[str, Any]]:
     return steps
 
 
-def scripted_vat_001(page: Any) -> list[dict[str, Any]]:
-    steps = []
-    page.click('a[href="/vat/business-details"]')
-    fill_fields(
-        page,
-        {
+VAT_SCRIPTED_VALUES = {
+    "vat-001": {
+        "business": {
             "#businessName": "Green Lane Studio Ltd",
             "#vatRegistrationNumber": "GB123456789",
             "#accountingPeriod": "1 January 2026 to 31 March 2026",
             "#periodKey": "26A1",
         },
-    )
-    click_save(page)
-    steps.append({"kind": "scripted", "action": "complete VAT business details"})
-
-    fill_fields(
-        page,
-        {
+        "figures": {
             "#box1": "8400.00",
             "#box2": "0.00",
             "#box3": "8400.00",
@@ -268,7 +259,38 @@ def scripted_vat_001(page: Any) -> list[dict[str, Any]]:
             "#box8": "0",
             "#box9": "0",
         },
-    )
+    },
+    "vat-002": {
+        "business": {
+            "#businessName": "Harbour Bike Repairs Ltd",
+            "#vatRegistrationNumber": "GB987654321",
+            "#accountingPeriod": "1 April 2026 to 30 June 2026",
+            "#periodKey": "26A2",
+        },
+        "figures": {
+            "#box1": "0.00",
+            "#box2": "0.00",
+            "#box3": "0.00",
+            "#box4": "0.00",
+            "#box5": "0.00",
+            "#box6": "18500",
+            "#box7": "1200",
+            "#box8": "0",
+            "#box9": "0",
+        },
+    },
+}
+
+
+def scripted_vat(case_id: str, page: Any) -> list[dict[str, Any]]:
+    values = VAT_SCRIPTED_VALUES[case_id]
+    steps = []
+    page.get_by_role("link", name="Business details").click()
+    fill_fields(page, values["business"])
+    click_save(page)
+    steps.append({"kind": "scripted", "action": "complete VAT business details"})
+
+    fill_fields(page, values["figures"])
     click_save(page)
     steps.append({"kind": "scripted", "action": "complete VAT figures"})
 
@@ -279,54 +301,80 @@ def scripted_vat_001(page: Any) -> list[dict[str, Any]]:
     return steps
 
 
-def scripted_ico_001(page: Any) -> list[dict[str, Any]]:
-    steps = []
-    page.click('a[href="/ico/organisation-details"]')
-    fill_fields(
-        page,
-        {
+ICO_SCRIPTED_VALUES = {
+    "ico-001": {
+        "organisation": {
             "#organisationName": "Brightwell Dental Care Ltd",
             "#icoRegistrationNumber": "ZA123456",
             "#contactName": "Dr Amira Khan",
             "#contactEmail": "amira.khan@brightwelldental.example",
             "#contactPhone": "01632 960421",
         },
-    )
-    click_save(page)
-    steps.append({"kind": "scripted", "action": "complete ICO organisation details"})
-
-    fill_fields(
-        page,
-        {
+        "breach": {
             "#awarenessDate": "2026-05-21",
             "#awarenessTime": "09:20",
             "#incidentDate": "2026-05-20",
             "#incidentTime": "16:45",
             "#incidentSummary": "A payroll spreadsheet was emailed to an incorrect external recipient.",
         },
-    )
-    click_save(page)
-    steps.append({"kind": "scripted", "action": "complete ICO breach details"})
-
-    fill_fields(
-        page,
-        {
+        "affected": {
             "#affectedIndividuals": "38",
             "#dataCategories": "Names, home addresses, bank account details, National Insurance numbers and salary information",
         },
-    )
+        "mitigation": {
+            "#containmentActions": "The recipient confirmed deletion, mailbox rules were reviewed, and affected staff were notified.",
+        },
+        "risk": "high",
+        "subjectsNotified": "yes",
+    },
+    "ico-002": {
+        "organisation": {
+            "#organisationName": "Riverton Library Trust",
+            "#icoRegistrationNumber": "ZA654321",
+            "#contactName": "Helen Morris",
+            "#contactEmail": "helen.morris@rivertonlibrary.example",
+            "#contactPhone": "01632 960512",
+        },
+        "breach": {
+            "#awarenessDate": "2026-05-18",
+            "#awarenessTime": "14:10",
+            "#incidentDate": "2026-05-18",
+            "#incidentTime": "13:35",
+            "#incidentSummary": "A volunteer rota email was sent to one unintended recipient.",
+        },
+        "affected": {
+            "#affectedIndividuals": "12",
+            "#dataCategories": "Names, volunteer email addresses and weekly shift availability",
+        },
+        "mitigation": {
+            "#containmentActions": "The unintended recipient confirmed deletion and the rota mailing list was corrected.",
+        },
+        "risk": "low",
+        "subjectsNotified": "no",
+    },
+}
+
+
+def scripted_ico(case_id: str, page: Any) -> list[dict[str, Any]]:
+    values = ICO_SCRIPTED_VALUES[case_id]
+    steps = []
+    page.get_by_role("link", name="Organisation details").click()
+    fill_fields(page, values["organisation"])
+    click_save(page)
+    steps.append({"kind": "scripted", "action": "complete ICO organisation details"})
+
+    fill_fields(page, values["breach"])
+    click_save(page)
+    steps.append({"kind": "scripted", "action": "complete ICO breach details"})
+
+    fill_fields(page, values["affected"])
     page.check("#specialCategoryData-no")
     click_save(page)
     steps.append({"kind": "scripted", "action": "complete ICO affected data"})
 
-    fill_fields(
-        page,
-        {
-            "#containmentActions": "The recipient confirmed deletion, mailbox rules were reviewed, and affected staff were notified.",
-        },
-    )
-    page.check("#likelyRisk-high")
-    page.check("#dataSubjectsNotified-yes")
+    fill_fields(page, values["mitigation"])
+    page.check(f"#likelyRisk-{values['risk']}")
+    page.check(f"#dataSubjectsNotified-{values['subjectsNotified']}")
     page.check("#dpoContacted-yes")
     click_save(page)
     steps.append({"kind": "scripted", "action": "complete ICO mitigation"})
@@ -338,10 +386,10 @@ def run_scripted_agent(case_id: str, page: Any, portal_url: str, max_steps: int)
         steps = scripted_ad01_001(page)
     elif case_id == "ad01-002":
         steps = scripted_ad01_002(page, portal_url)
-    elif case_id == "vat-001":
-        steps = scripted_vat_001(page)
-    elif case_id == "ico-001":
-        steps = scripted_ico_001(page)
+    elif case_id in VAT_SCRIPTED_VALUES:
+        steps = scripted_vat(case_id, page)
+    elif case_id in ICO_SCRIPTED_VALUES:
+        steps = scripted_ico(case_id, page)
     else:
         raise RuntimeError(f"No scripted agent configured for case {case_id}")
     if len(steps) > max_steps:
