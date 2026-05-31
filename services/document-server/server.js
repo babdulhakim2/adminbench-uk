@@ -4,7 +4,7 @@ const documents = require('./data/documents')
 const app = express()
 const port = Number(process.env.PORT || 4002)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
+const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'ad01-003', 'vat-default', 'ico-default'])
 
 let resetMetadata = {
   trialId: null,

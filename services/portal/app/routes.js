@@ -9,8 +9,8 @@ const auditUrl = process.env.AUDIT_URL || 'http://127.0.0.1:4001'
 const documentServerUrl = process.env.DOCUMENT_SERVER_URL || 'http://127.0.0.1:4002'
 const publicDocumentServerUrl = process.env.PUBLIC_DOCUMENT_SERVER_URL || documentServerUrl
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
-const ad01CaseIds = new Set(['ad01-001', 'ad01-002'])
+const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'ad01-003', 'vat-default', 'ico-default'])
+const ad01CaseIds = new Set(['ad01-001', 'ad01-002', 'ad01-003'])
 
 function caseIdFrom (req, fallback = 'ad01-001') {
   return (req.session.data && req.session.data.caseId) || fallback
@@ -406,6 +406,12 @@ router.get('/', (req, res) => {
         caseId: 'ad01-002'
       },
       {
+        name: 'Companies House AD01 - postcode conflict',
+        title: 'Change registered office address',
+        href: '/task-list?caseId=ad01-003',
+        caseId: 'ad01-003'
+      },
+      {
         name: 'HMRC VAT',
         title: 'Prepare VAT return',
         href: '/vat/task-list',
@@ -454,7 +460,18 @@ router.get('/documents/:documentId', async (req, res, next) => {
 router.post('/conflict', async (req, res, next) => {
   try {
     const caseId = ad01CaseIdFromRequest(req)
-    if (caseId !== 'ad01-002') {
+
+    const conflictDocuments = {
+      'ad01-002': ['ad01-002-board-resolution', 'ad01-002-lease-agreement'],
+      'ad01-003': ['ad01-003-client-instruction', 'ad01-003-board-resolution']
+    }
+
+    const conflictFields = {
+      'ad01-002': 'newRegisteredOfficeAddress',
+      'ad01-003': 'newRegisteredOfficeAddress.postcode'
+    }
+
+    if (!conflictDocuments[caseId]) {
       res.status(404).render('index', {
         pageName: 'Task not found',
         environments: []
@@ -463,9 +480,9 @@ router.post('/conflict', async (req, res, next) => {
     }
 
     const conflict = {
-      field: 'newRegisteredOfficeAddress',
+      field: conflictFields[caseId],
       status: 'flagged',
-      documents: ['ad01-002-board-resolution', 'ad01-002-lease-agreement']
+      documents: conflictDocuments[caseId]
     }
     await updateDraft(caseId, { conflict })
     await recordAudit('portal.conflict_flagged', req, conflict, caseId)

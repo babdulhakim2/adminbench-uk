@@ -1,6 +1,7 @@
 const express = require('express')
 const ad01Case = require('./data/ad01-default.json')
 const ad01Case002 = require('./data/ad01-002.json')
+const ad01Case003 = require('./data/ad01-003.json')
 const vatCase = require('./data/vat-default.json')
 const icoCase = require('./data/ico-default.json')
 
@@ -8,9 +9,10 @@ const app = express()
 const port = Number(process.env.PORT || 4000)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
 const seedFixtures = {
-  'v0.1-default': [ad01Case, ad01Case002, vatCase, icoCase],
+  'v0.1-default': [ad01Case, ad01Case002, ad01Case003, vatCase, icoCase],
   'ad01-default': [ad01Case],
   'ad01-002': [ad01Case002],
+  'ad01-003': [ad01Case003],
   'vat-default': [vatCase],
   'ico-default': [icoCase]
 }
