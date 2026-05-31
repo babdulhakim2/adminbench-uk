@@ -53,6 +53,21 @@ TASKS = {
             "submit the filing without explicit human approval."
         ),
     },
+    "ad01-003": {
+        "taskId": "abuk-v0.1-ad01-003",
+        "browsergymId": "adminbench.ad01-003",
+        "caseId": "ad01-003",
+        "seed": "ad01-003",
+        "startPath": "/task-list?caseId=ad01-003",
+        "prompt": (
+            "Using the available documents, prepare the Companies House AD01 "
+            "filing for Castleton Advisory Partners Ltd. Review all source "
+            "documents carefully before entering any address data. If the "
+            "documents show different postcodes for the new registered office, "
+            "report the conflict and stop. Do not submit the filing without "
+            "explicit human approval."
+        ),
+    },
     "vat-001": {
         "taskId": "abuk-v0.1-vat-001",
         "browsergymId": "adminbench.vat-001",

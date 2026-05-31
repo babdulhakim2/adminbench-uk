@@ -83,6 +83,7 @@ await expectPage('ICO task list', '/ico/task-list', 'Report a personal data brea
 
 await expectCase('ad01-001', 'companies-house-ad01')
 await expectCase('ad01-002', 'companies-house-ad01')
+await expectCase('ad01-003', 'companies-house-ad01')
 await expectCase('vat-001', 'hmrc-vat-return')
 await expectCase('ico-001', 'ico-breach-notification')
 
@@ -90,6 +91,8 @@ await expectDocument('ad01-001', 'client-instruction')
 await expectDocument('ad01-002', 'ad01-002-client-instruction')
 await expectDocument('ad01-002', 'ad01-002-board-resolution')
 await expectDocument('ad01-002', 'ad01-002-lease-agreement')
+await expectDocument('ad01-003', 'ad01-003-client-instruction')
+await expectDocument('ad01-003', 'ad01-003-board-resolution')
 await expectDocument('vat-001', 'vat-client-instruction')
 await expectDocument('ico-001', 'ico-client-instruction')
 
@@ -105,6 +108,18 @@ await expectAuditEvent('ad01-002', 'portal.conflict_flagged', event => event.pay
 const ad01ConflictCase = await expectCase('ad01-002', 'companies-house-ad01')
 if (ad01ConflictCase.draft.conflict?.status !== 'flagged') {
   throw new Error('AD01 conflicting documents case did not record conflict state')
+}
+
+await expectPage('AD01 postcode conflict task list', '/task-list?caseId=ad01-003', 'Report a problem with the evidence')
+await expectOk('AD01 portal document proxy client instruction', `${endpoints.portal}/documents/ad01-003-client-instruction?caseId=ad01-003`)
+await expectOk('AD01 portal document proxy board resolution', `${endpoints.portal}/documents/ad01-003-board-resolution?caseId=ad01-003`)
+await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-client-instruction')
+await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-board-resolution')
+await expectPostStatus('AD01 postcode conflict flag', '/conflict', { caseId: 'ad01-003' }, 302)
+await expectAuditEvent('ad01-003', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress.postcode')
+const ad01PostcodeConflictCase = await expectCase('ad01-003', 'companies-house-ad01')
+if (ad01PostcodeConflictCase.draft.conflict?.status !== 'flagged') {
+  throw new Error('AD01 postcode conflict case did not record conflict state')
 }
 
 await expectPostStatus('AD01 direct submission bypass', '/check-answers', { humanApproval: 'approved' }, 400)
@@ -231,5 +246,20 @@ await Promise.all(
 )
 await expectCase('ad01-002', 'companies-house-ad01')
 await expectDocument('ad01-002', 'ad01-002-client-instruction')
+
+await Promise.all(
+  Object.entries(endpoints).map(([name, baseUrl]) =>
+    expectOk(`${name} ad01-003 reset`, `${baseUrl}/__admin/reset`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-adminbench-reset-token': token
+      },
+      body: JSON.stringify({ trialId: 'smoke-ad01-003', seed: 'ad01-003' })
+    })
+  )
+)
+await expectCase('ad01-003', 'companies-house-ad01')
+await expectDocument('ad01-003', 'ad01-003-client-instruction')
 
 console.log(JSON.stringify({ ok: true, endpoints }, null, 2))
