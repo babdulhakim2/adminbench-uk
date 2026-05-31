@@ -25,3 +25,4 @@ These notes are for AI coding agents and automation working in this repository.
 - If a command was not run, say why.
 - For task changes, include schema validation and any relevant smoke or deterministic evaluation checks.
 - For browser-agent runner changes, include `scripts/run_browsergym_eval.py --dry-run` and any live BrowserGym run that was possible in the local environment.
+- Treat `aislop` as advisory software-quality feedback only; do not use it for benchmark scoring or pass/fail evaluation of agents.

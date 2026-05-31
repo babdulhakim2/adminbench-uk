@@ -1,0 +1,42 @@
+name: Advisory aislop code quality scan
+
+on:
+  pull_request:
+    paths:
+      - "**/*.js"
+      - "**/*.mjs"
+      - "**/*.py"
+      - "**/*.rb"
+      - "**/*.md"
+      - ".aislop/**"
+      - ".github/workflows/quality-aislop.yml"
+      - "package.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.js"
+      - "**/*.mjs"
+      - "**/*.py"
+      - "**/*.rb"
+      - "**/*.md"
+      - ".aislop/**"
+      - ".github/workflows/quality-aislop.yml"
+      - "package.json"
+
+jobs:
+  aislop:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run advisory aislop scan
+        continue-on-error: true
+        run: npx --yes aislop@latest ci .

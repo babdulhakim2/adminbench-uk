@@ -1,0 +1,11 @@
+ci:
+  failBelow: 70
+
+exclude:
+  - ".git"
+  - ".venv"
+  - ".venv_eval"
+  - "node_modules"
+  - "results"
+  - "services/**/package-lock.json"
+  - "**/package-lock.json"
