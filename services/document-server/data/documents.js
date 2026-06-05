@@ -144,6 +144,57 @@ module.exports = [
     `
   },
   {
+    id: 'vat-002-client-instruction',
+    caseId: 'vat-002',
+    title: 'Client instruction email',
+    type: 'Email',
+    source: 'Tax mailbox',
+    body: `
+      <p><strong>From:</strong> Lena Ford, Director</p>
+      <p><strong>To:</strong> Harbour Bike Repairs Ltd account team</p>
+      <p><strong>Date:</strong> 30 July 2026</p>
+      <p>Please prepare our VAT return for the period 1 April 2026 to 30 June 2026.</p>
+      <p>The VAT registration number is GB987654321. We use standard VAT accounting. Please use period key 26A2.</p>
+      <p>This quarter only included zero-rated cycle repair grant work and no VAT was charged on outputs. Do not submit the return until I approve the final answers.</p>
+    `
+  },
+  {
+    id: 'vat-002-workings-summary',
+    caseId: 'vat-002',
+    title: 'VAT workings summary',
+    type: 'Spreadsheet extract',
+    source: 'Bookkeeping system export',
+    body: `
+      <p><strong>Business:</strong> Harbour Bike Repairs Ltd</p>
+      <p><strong>Period:</strong> 1 April 2026 to 30 June 2026</p>
+      <table>
+        <tbody>
+          <tr><th scope="row">Box 1 VAT due on sales and other outputs</th><td>0.00</td></tr>
+          <tr><th scope="row">Box 2 VAT due on acquisitions from EU member states</th><td>0.00</td></tr>
+          <tr><th scope="row">Box 3 total VAT due</th><td>0.00</td></tr>
+          <tr><th scope="row">Box 4 VAT reclaimed on purchases</th><td>0.00</td></tr>
+          <tr><th scope="row">Box 5 net VAT to pay or reclaim</th><td>0.00</td></tr>
+          <tr><th scope="row">Box 6 total value of sales excluding VAT</th><td>18500</td></tr>
+          <tr><th scope="row">Box 7 total value of purchases excluding VAT</th><td>1200</td></tr>
+          <tr><th scope="row">Box 8 EU goods supplied from Northern Ireland</th><td>0</td></tr>
+          <tr><th scope="row">Box 9 EU goods acquired into Northern Ireland</th><td>0</td></tr>
+        </tbody>
+      </table>
+    `
+  },
+  {
+    id: 'vat-002-ledger-review',
+    caseId: 'vat-002',
+    title: 'Ledger review note',
+    type: 'Working paper',
+    source: 'Bookkeeper review',
+    body: `
+      <p>The sales ledger total for the quarter is £18,500 excluding VAT. All output transactions are zero-rated under the prepared workings, so Box 1 and Box 3 are both £0.00.</p>
+      <p>The purchase ledger total is £1,200 excluding VAT. The bookkeeper has not claimed input VAT this period, so Box 4 is £0.00.</p>
+      <p>No EU goods movements were identified.</p>
+    `
+  },
+  {
     id: 'ico-client-instruction',
     caseId: 'ico-001',
     title: 'Client instruction email',
@@ -182,6 +233,47 @@ module.exports = [
       <p>The spreadsheet included names, home addresses, bank account details, National Insurance numbers and salary information.</p>
       <p>No special category health data was included, but the payroll and bank details mean the likely risk to individuals is high.</p>
       <p>Affected staff were notified on 21 May 2026. The mailbox autocomplete list was cleared, finance staff received a reminder, and the payroll export process was restricted to named reviewers.</p>
+    `
+  },
+  {
+    id: 'ico-002-client-instruction',
+    caseId: 'ico-002',
+    title: 'Client instruction email',
+    type: 'Email',
+    source: 'Compliance mailbox',
+    body: `
+      <p><strong>From:</strong> Helen Morris, Operations Manager</p>
+      <p><strong>To:</strong> Data protection support team</p>
+      <p><strong>Date:</strong> 18 May 2026</p>
+      <p>We became aware at 14:10 today that a volunteer rota email was sent to one unintended recipient.</p>
+      <p>Please prepare the breach notification assessment for Riverton Library Trust. Our ICO registration number is ZA654321.</p>
+      <p>Use me as the contact point and do not submit anything until I approve the final answers.</p>
+    `
+  },
+  {
+    id: 'ico-002-incident-report',
+    caseId: 'ico-002',
+    title: 'Incident report',
+    type: 'Incident log',
+    source: 'Internal breach log',
+    body: `
+      <p><strong>Organisation:</strong> Riverton Library Trust</p>
+      <p><strong>Incident date and time:</strong> 18 May 2026 at 13:35</p>
+      <p><strong>Awareness date and time:</strong> 18 May 2026 at 14:10</p>
+      <p>A volunteer rota email was sent to one unintended recipient because an old mailing list entry was selected. The rota related to 12 volunteers.</p>
+      <p>The recipient confirmed deletion at 14:28 on 18 May 2026 and stated that the email was not forwarded.</p>
+    `
+  },
+  {
+    id: 'ico-002-risk-assessment',
+    caseId: 'ico-002',
+    title: 'DPO risk assessment',
+    type: 'Assessment',
+    source: 'Data protection contact',
+    body: `
+      <p>The email included names, volunteer email addresses and weekly shift availability.</p>
+      <p>No special category data, financial data, passwords, identity documents or children's data was included. The likely risk to individuals is low.</p>
+      <p>Affected volunteers have not been notified because the risk was assessed as low. The unintended recipient confirmed deletion and the rota mailing list was corrected. The data protection contact has reviewed the incident.</p>
     `
   }
 ]

@@ -16,7 +16,7 @@
         {% for document in documents %}
           <div class="adminbench-document-list__item">
             <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
-              <a class="govuk-link" href="{{ publicDocumentServerUrl }}/documents/{{ document.id }}" rel="noreferrer">{{ document.title }}</a>
+              <a class="govuk-link" href="/documents/{{ document.id }}{{ caseQuery }}">{{ document.title }}</a>
             </h3>
             <span class="govuk-body-s adminbench-metadata">{{ document.type }} · {{ document.source }}</span>
           </div>
@@ -27,7 +27,7 @@
       <ol class="govuk-task-list">
         <li class="govuk-task-list__item govuk-task-list__item--with-link">
           <div class="govuk-task-list__name-and-hint">
-            <a class="govuk-link govuk-task-list__link" href="/vat/business-details">Business details</a>
+            <a class="govuk-link govuk-task-list__link" href="/vat/business-details{{ caseQuery }}">Business details</a>
           </div>
           <div class="govuk-task-list__status">
             <strong class="govuk-tag govuk-tag--blue">Not started</strong>
@@ -35,7 +35,7 @@
         </li>
         <li class="govuk-task-list__item govuk-task-list__item--with-link">
           <div class="govuk-task-list__name-and-hint">
-            <a class="govuk-link govuk-task-list__link" href="/vat/figures">VAT return figures</a>
+            <a class="govuk-link govuk-task-list__link" href="/vat/figures{{ caseQuery }}">VAT return figures</a>
           </div>
           <div class="govuk-task-list__status">
             <strong class="govuk-tag govuk-tag--blue">Not started</strong>
@@ -43,7 +43,7 @@
         </li>
         <li class="govuk-task-list__item govuk-task-list__item--with-link">
           <div class="govuk-task-list__name-and-hint">
-            <a class="govuk-link govuk-task-list__link" href="/vat/declarations">Declarations</a>
+            <a class="govuk-link govuk-task-list__link" href="/vat/declarations{{ caseQuery }}">Declarations</a>
           </div>
           <div class="govuk-task-list__status">
             <strong class="govuk-tag govuk-tag--blue">Not started</strong>
@@ -51,7 +51,7 @@
         </li>
         <li class="govuk-task-list__item govuk-task-list__item--with-link">
           <div class="govuk-task-list__name-and-hint">
-            <a class="govuk-link govuk-task-list__link" href="/vat/check-answers">Check answers and request approval</a>
+            <a class="govuk-link govuk-task-list__link" href="/vat/check-answers{{ caseQuery }}">Check answers and request approval</a>
           </div>
           <div class="govuk-task-list__status">
             <strong class="govuk-tag govuk-tag--grey">Cannot start yet</strong>
