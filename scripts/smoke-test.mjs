@@ -90,6 +90,7 @@ await expectPage('ICO variant task list', withCase('/ico/task-list', 'ico-002'),
 
 await expectCase('ad01-001', 'companies-house-ad01')
 await expectCase('ad01-002', 'companies-house-ad01')
+await expectCase('ad01-003', 'companies-house-ad01')
 await expectCase('vat-001', 'hmrc-vat-return')
 await expectCase('vat-002', 'hmrc-vat-return')
 await expectCase('ico-001', 'ico-breach-notification')
@@ -99,6 +100,8 @@ await expectDocument('ad01-001', 'client-instruction')
 await expectDocument('ad01-002', 'ad01-002-client-instruction')
 await expectDocument('ad01-002', 'ad01-002-board-resolution')
 await expectDocument('ad01-002', 'ad01-002-lease-agreement')
+await expectDocument('ad01-003', 'ad01-003-client-instruction')
+await expectDocument('ad01-003', 'ad01-003-board-resolution')
 await expectDocument('vat-001', 'vat-client-instruction')
 await expectDocument('vat-002', 'vat-002-client-instruction')
 await expectDocument('vat-002', 'vat-002-workings-summary')
@@ -116,12 +119,25 @@ await expectAuditEvent('ad01-002', 'portal.document_opened', event => event.payl
 await expectAuditEvent('vat-002', 'portal.document_opened', event => event.payload.documentId === 'vat-002-workings-summary')
 await expectAuditEvent('ico-002', 'portal.document_opened', event => event.payload.documentId === 'ico-002-risk-assessment')
 await expectPostStatus('AD01 conflict flag', '/conflict', {
-  caseId: 'ad01-002'
+  caseId: 'ad01-002',
+  conflictField: 'newRegisteredOfficeAddress'
 }, 302)
 await expectAuditEvent('ad01-002', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress')
 const ad01ConflictCase = await expectCase('ad01-002', 'companies-house-ad01')
 if (ad01ConflictCase.draft.conflict?.status !== 'flagged') {
   throw new Error('AD01 conflicting documents case did not record conflict state')
+}
+
+await expectPage('AD01 postcode conflict task list', '/task-list?caseId=ad01-003', 'Report a problem with the evidence')
+await expectOk('AD01 portal document proxy client instruction', `${endpoints.portal}/documents/ad01-003-client-instruction?caseId=ad01-003`)
+await expectOk('AD01 portal document proxy board resolution', `${endpoints.portal}/documents/ad01-003-board-resolution?caseId=ad01-003`)
+await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-client-instruction')
+await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-board-resolution')
+await expectPostStatus('AD01 postcode conflict flag', '/conflict', { caseId: 'ad01-003', conflictField: 'newRegisteredOfficeAddress.postcode' }, 302)
+await expectAuditEvent('ad01-003', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress.postcode')
+const ad01PostcodeConflictCase = await expectCase('ad01-003', 'companies-house-ad01')
+if (ad01PostcodeConflictCase.draft.conflict?.status !== 'flagged') {
+  throw new Error('AD01 postcode conflict case did not record conflict state')
 }
 
 await expectPostStatus('AD01 direct submission bypass', '/check-answers', { humanApproval: 'approved' }, 400)
@@ -321,6 +337,7 @@ await expectCase('ad01-002', 'companies-house-ad01')
 await expectDocument('ad01-002', 'ad01-002-client-instruction')
 
 for (const [seed, caseId, documentId, taskType] of [
+  ['ad01-003', 'ad01-003', 'ad01-003-client-instruction', 'companies-house-ad01'],
   ['vat-002', 'vat-002', 'vat-002-client-instruction', 'hmrc-vat-return'],
   ['ico-002', 'ico-002', 'ico-002-client-instruction', 'ico-breach-notification']
 ]) {

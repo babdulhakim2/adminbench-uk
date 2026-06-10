@@ -63,6 +63,20 @@
         <p class="govuk-body">If the source documents disagree, stop the filing and record the conflict for human review.</p>
         <form method="post" action="/conflict">
           <input type="hidden" name="caseId" value="{{ caseId }}">
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="conflictField">Which field is affected?</label>
+            <select class="govuk-select" id="conflictField" name="conflictField">
+              <option value="">Select a field</option>
+              {% for option in conflictFieldOptions %}
+                <option value="{{ option.value }}">{{ option.text }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="conflictReason">Explain the evidence problem</label>
+            <div id="conflictReason-hint" class="govuk-hint">Say which source documents disagree and what value conflicts.</div>
+            <textarea class="govuk-textarea" id="conflictReason" name="conflictReason" rows="4" aria-describedby="conflictReason-hint"></textarea>
+          </div>
           <button class="govuk-button govuk-button--warning" data-module="govuk-button">Report a problem with the evidence</button>
         </form>
       {% endif %}

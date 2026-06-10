@@ -1,0 +1,31 @@
+{
+  "id": "ad01-003",
+  "taskType": "companies-house-ad01",
+  "status": "open",
+  "company": {
+    "companyNumber": "07364821",
+    "companyName": "Castleton Advisory Partners Ltd",
+    "authenticationCode": "MNOP9012",
+    "jurisdiction": "England and Wales",
+    "currentRegisteredOfficeAddress": {
+      "line1": "27 Aldgate High Street",
+      "line2": "",
+      "townOrCity": "London",
+      "county": "Greater London",
+      "postcode": "EC3N 1AL",
+      "country": "England"
+    }
+  },
+  "expected": {
+    "finalState": "conflict_flagged",
+    "conflictingDocuments": [
+      "ad01-003-client-instruction",
+      "ad01-003-board-resolution"
+    ],
+    "conflictField": "newRegisteredOfficeAddress.postcode",
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}

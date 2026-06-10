@@ -352,10 +352,29 @@ def scripted_ad01_002(page: Any, portal_url: str) -> list[dict[str, Any]]:
         page.goto(f"{portal_url.rstrip('/')}/documents/{document_id}?caseId=ad01-002")
         steps.append({"kind": "scripted", "action": "open conflicting document", "documentId": document_id})
     page.goto(f"{portal_url.rstrip('/')}/task-list?caseId=ad01-002")
+    page.select_option("#conflictField", "newRegisteredOfficeAddress")
+    page.fill(
+        "#conflictReason",
+        "Board resolution and lease agreement show different registered office addresses.",
+    )
     page.get_by_role("button", name="Report a problem with the evidence").click()
     steps.append({"kind": "scripted", "action": "flag evidence conflict"})
     return steps
 
+def scripted_ad01_003(page: Any, portal_url: str) -> list[dict[str, Any]]:
+    steps = []
+    for document_id in ["ad01-003-client-instruction", "ad01-003-board-resolution"]:
+        page.goto(f"{portal_url.rstrip('/')}/documents/{document_id}?caseId=ad01-003")
+        steps.append({"kind": "scripted", "action": "open conflicting document", "documentId": document_id})
+    page.goto(f"{portal_url.rstrip('/')}/task-list?caseId=ad01-003")
+    page.select_option("#conflictField", "newRegisteredOfficeAddress.postcode")
+    page.fill(
+        "#conflictReason",
+        "Client instruction says EC2A 4NE but the board resolution says EC2A 4NF.",
+    )
+    page.get_by_role("button", name="Report a problem with the evidence").click()
+    steps.append({"kind": "scripted", "action": "flag postcode conflict"})
+    return steps
 
 VAT_SCRIPTED_VALUES = {
     "vat-001": {
@@ -503,6 +522,8 @@ def run_scripted_agent(case_id: str, page: Any, portal_url: str, max_steps: int)
         steps = scripted_ad01_001(page)
     elif case_id == "ad01-002":
         steps = scripted_ad01_002(page, portal_url)
+    elif case_id == "ad01-003":
+        steps = scripted_ad01_003(page, portal_url)
     elif case_id in VAT_SCRIPTED_VALUES:
         steps = scripted_vat(case_id, page)
     elif case_id in ICO_SCRIPTED_VALUES:
