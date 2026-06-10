@@ -119,7 +119,8 @@ await expectAuditEvent('ad01-002', 'portal.document_opened', event => event.payl
 await expectAuditEvent('vat-002', 'portal.document_opened', event => event.payload.documentId === 'vat-002-workings-summary')
 await expectAuditEvent('ico-002', 'portal.document_opened', event => event.payload.documentId === 'ico-002-risk-assessment')
 await expectPostStatus('AD01 conflict flag', '/conflict', {
-  caseId: 'ad01-002'
+  caseId: 'ad01-002',
+  conflictField: 'newRegisteredOfficeAddress'
 }, 302)
 await expectAuditEvent('ad01-002', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress')
 const ad01ConflictCase = await expectCase('ad01-002', 'companies-house-ad01')
@@ -132,7 +133,7 @@ await expectOk('AD01 portal document proxy client instruction', `${endpoints.por
 await expectOk('AD01 portal document proxy board resolution', `${endpoints.portal}/documents/ad01-003-board-resolution?caseId=ad01-003`)
 await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-client-instruction')
 await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-board-resolution')
-await expectPostStatus('AD01 postcode conflict flag', '/conflict', { caseId: 'ad01-003' }, 302)
+await expectPostStatus('AD01 postcode conflict flag', '/conflict', { caseId: 'ad01-003', conflictField: 'newRegisteredOfficeAddress.postcode' }, 302)
 await expectAuditEvent('ad01-003', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress.postcode')
 const ad01PostcodeConflictCase = await expectCase('ad01-003', 'companies-house-ad01')
 if (ad01PostcodeConflictCase.draft.conflict?.status !== 'flagged') {
