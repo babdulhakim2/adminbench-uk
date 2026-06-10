@@ -3,7 +3,7 @@
 {% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
 
 {% block content %}
-  <a href="/ico/mitigation" class="govuk-back-link">Back</a>
+  <a href="/ico/mitigation{{ caseQuery }}" class="govuk-back-link">Back</a>
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
@@ -35,12 +35,12 @@
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key" id="ico-organisation-details">Organisation name</dt>
           <dd class="govuk-summary-list__value">{{ organisationDetails.organisationName or data.organisationName or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/organisation-details">Change<span class="govuk-visually-hidden"> organisation name</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/organisation-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> organisation name</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">ICO registration number</dt>
           <dd class="govuk-summary-list__value">{{ organisationDetails.icoRegistrationNumber or data.icoRegistrationNumber or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/organisation-details">Change<span class="govuk-visually-hidden"> ICO registration number</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/organisation-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> ICO registration number</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Contact</dt>
@@ -49,7 +49,7 @@
             {{ organisationDetails.contactEmail or data.contactEmail or 'Not provided' }}<br>
             {{ organisationDetails.contactPhone or data.contactPhone or 'Not provided' }}
           </dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/organisation-details">Change<span class="govuk-visually-hidden"> contact details</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/organisation-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> contact details</span></a></dd>
         </div>
       </dl>
 
@@ -57,17 +57,17 @@
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key" id="ico-breach-details">Awareness date and time</dt>
           <dd class="govuk-summary-list__value">{{ breachDetails.awarenessDate or data.awarenessDate or 'Not provided' }} {{ breachDetails.awarenessTime or data.awarenessTime or '' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/breach-details">Change<span class="govuk-visually-hidden"> awareness date and time</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/breach-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> awareness date and time</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Incident date and time</dt>
           <dd class="govuk-summary-list__value">{{ breachDetails.incidentDate or data.incidentDate or 'Not provided' }} {{ breachDetails.incidentTime or data.incidentTime or '' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/breach-details">Change<span class="govuk-visually-hidden"> incident date and time</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/breach-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> incident date and time</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">What happened?</dt>
           <dd class="govuk-summary-list__value">{{ breachDetails.incidentSummary or data.incidentSummary or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/breach-details">Change<span class="govuk-visually-hidden"> incident summary</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/breach-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> incident summary</span></a></dd>
         </div>
       </dl>
 
@@ -75,17 +75,17 @@
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key" id="ico-affected-data">People affected</dt>
           <dd class="govuk-summary-list__value">{{ affectedData.affectedIndividuals or data.affectedIndividuals or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/affected-data">Change<span class="govuk-visually-hidden"> people affected</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/affected-data{{ caseQuery }}">Change<span class="govuk-visually-hidden"> people affected</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Personal data involved</dt>
           <dd class="govuk-summary-list__value">{{ affectedData.dataCategories or data.dataCategories or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/affected-data">Change<span class="govuk-visually-hidden"> personal data involved</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/affected-data{{ caseQuery }}">Change<span class="govuk-visually-hidden"> personal data involved</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Special category data</dt>
           <dd class="govuk-summary-list__value">{{ affectedData.specialCategoryData or data.specialCategoryData or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/affected-data">Change<span class="govuk-visually-hidden"> special category data</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/affected-data{{ caseQuery }}">Change<span class="govuk-visually-hidden"> special category data</span></a></dd>
         </div>
       </dl>
 
@@ -93,21 +93,22 @@
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key" id="ico-mitigation">Measures taken</dt>
           <dd class="govuk-summary-list__value">{{ mitigation.containmentActions or data.containmentActions or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/mitigation">Change<span class="govuk-visually-hidden"> measures taken</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/mitigation{{ caseQuery }}">Change<span class="govuk-visually-hidden"> measures taken</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Likely risk</dt>
           <dd class="govuk-summary-list__value">{{ mitigation.likelyRisk or data.likelyRisk or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/mitigation">Change<span class="govuk-visually-hidden"> likely risk</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/mitigation{{ caseQuery }}">Change<span class="govuk-visually-hidden"> likely risk</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Affected people notified</dt>
           <dd class="govuk-summary-list__value">{{ mitigation.dataSubjectsNotified or data.dataSubjectsNotified or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/mitigation">Change<span class="govuk-visually-hidden"> notification status</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/ico/mitigation{{ caseQuery }}">Change<span class="govuk-visually-hidden"> notification status</span></a></dd>
         </div>
       </dl>
 
       <form method="post" novalidate>
+        <input type="hidden" name="caseId" value="{{ caseId }}">
         <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#humanApproval') | list | length %} govuk-form-group--error{% endif %}">
           <fieldset class="govuk-fieldset" id="humanApproval" aria-describedby="humanApproval-hint">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Human approval</legend>

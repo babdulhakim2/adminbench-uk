@@ -64,6 +64,7 @@ services:
     environment:
       PORT: "4002"
       RESET_TOKEN: ${RESET_TOKEN:-adminbench-reset-token}
+      PUBLIC_PORTAL_URL: http://localhost:3000
     ports:
       - "4002:4002"
     healthcheck:

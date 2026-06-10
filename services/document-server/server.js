@@ -4,7 +4,13 @@ const documents = require('./data/documents')
 const app = express()
 const port = Number(process.env.PORT || 4002)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
+const publicPortalUrl = process.env.PUBLIC_PORTAL_URL || 'http://localhost:3000'
+const defaultSeedAliases = new Map([
+  ['ad01-default', 'ad01-001'],
+  ['vat-default', 'vat-001'],
+  ['ico-default', 'ico-001']
+])
+const supportedCaseIds = new Set(documents.map(document => document.caseId))
 
 let resetMetadata = {
   trialId: null,
@@ -18,6 +24,12 @@ function requireResetToken (req, res, next) {
     return
   }
   next()
+}
+
+function isSupportedSeed (seed) {
+  if (seed === 'v0.1-default') return true
+  const caseId = defaultSeedAliases.get(seed) || seed
+  return supportedCaseIds.has(caseId)
 }
 
 function page (title, content) {
@@ -38,6 +50,29 @@ function page (title, content) {
 </html>`
 }
 
+function caseQuery (caseId) {
+  return caseId ? `?caseId=${encodeURIComponent(caseId)}` : ''
+}
+
+function portalDocumentUrl (documentId, caseId) {
+  if (!caseId) return `/documents/${encodeURIComponent(documentId)}`
+  const url = new URL(`/documents/${encodeURIComponent(documentId)}`, publicPortalUrl)
+  url.searchParams.set('caseId', caseId)
+  return url.toString()
+}
+
+function taskListPath (caseId) {
+  if (caseId && caseId.startsWith('vat-')) return '/vat/task-list'
+  if (caseId && caseId.startsWith('ico-')) return '/ico/task-list'
+  return '/task-list'
+}
+
+function portalTaskListUrl (caseId) {
+  const url = new URL(taskListPath(caseId), publicPortalUrl)
+  if (caseId) url.searchParams.set('caseId', caseId)
+  return url.toString()
+}
+
 app.use(express.json())
 
 app.get('/healthz', (req, res) => {
@@ -46,7 +81,7 @@ app.get('/healthz', (req, res) => {
 
 app.post('/__admin/reset', requireResetToken, (req, res) => {
   const seed = req.body.seed || 'v0.1-default'
-  if (!supportedSeeds.has(seed)) {
+  if (!isSupportedSeed(seed)) {
     res.status(400).json({ ok: false, error: `Unsupported seed: ${seed}` })
     return
   }
@@ -80,9 +115,10 @@ app.get('/documents', (req, res) => {
   const caseId = req.query.caseId
   const visibleDocuments = caseId ? documents.filter(document => document.caseId === caseId) : documents
   const links = visibleDocuments
-    .map(document => `<li><a href="/documents/${document.id}">${document.title}</a> <span class="meta">${document.type}</span></li>`)
+    .map(document => `<li><a href="${portalDocumentUrl(document.id, caseId)}">${document.title}</a> <span class="meta">${document.type}</span></li>`)
     .join('')
-  res.type('html').send(page('Documents', `<h1>Task documents</h1><ul>${links}</ul>`))
+  const backLink = caseId ? `<p><a href="${portalTaskListUrl(caseId)}">Back to task list</a></p>` : ''
+  res.type('html').send(page('Documents', `${backLink}<h1>Task documents</h1><ul>${links}</ul>`))
 })
 
 app.get('/documents/:documentId', (req, res) => {
@@ -92,9 +128,11 @@ app.get('/documents/:documentId', (req, res) => {
     return
   }
 
+  const caseId = req.query.caseId || document.caseId
   res.type('html').send(page(
     document.title,
-    `<p><a href="/documents">Back to documents</a></p>
+    `<p><a href="/documents${caseQuery(caseId)}">Back to documents</a></p>
+     <p><a href="${portalTaskListUrl(caseId)}">Back to task list</a></p>
      <h1>${document.title}</h1>
      <p class="meta">${document.type} · ${document.source}</p>
      ${document.body}`

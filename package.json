@@ -11,6 +11,7 @@
     "browsergym:config": "python3 scripts/browsergym_adminbench.py --print-config",
     "browsergym:smoke": "python3 scripts/browsergym_adminbench.py --smoke --headless",
     "browsergym:run": "python3 scripts/run_browsergym_eval.py",
+    "browsergym:openrouter": "python3 scripts/run_openrouter_matrix.py",
     "smoke": "node scripts/smoke-test.mjs",
     "quality:aislop": "npx --yes aislop@latest ci .",
     "validate:tasks": "ruby scripts/validate-task-schema.rb",

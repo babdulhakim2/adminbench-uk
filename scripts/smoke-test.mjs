@@ -7,6 +7,11 @@ const endpoints = {
   documents: process.env.DOCUMENT_SERVER_URL || 'http://127.0.0.1:4002'
 }
 
+function withCase (path, caseId) {
+  const joiner = path.includes('?') ? '&' : '?'
+  return `${path}${joiner}caseId=${encodeURIComponent(caseId)}`
+}
+
 async function expectOk (label, url, options) {
   const response = await fetch(url, options)
   if (!response.ok) {
@@ -80,24 +85,36 @@ await expectPage('environment index', '/', 'v0.1 task environments')
 await expectPage('AD01 task list', '/task-list', 'Change registered office address')
 await expectPage('VAT task list', '/vat/task-list', 'Prepare VAT return')
 await expectPage('ICO task list', '/ico/task-list', 'Report a personal data breach')
+await expectPage('VAT variant task list', withCase('/vat/task-list', 'vat-002'), 'Harbour Bike Repairs Ltd')
+await expectPage('ICO variant task list', withCase('/ico/task-list', 'ico-002'), 'Riverton Library Trust')
 
 await expectCase('ad01-001', 'companies-house-ad01')
 await expectCase('ad01-002', 'companies-house-ad01')
 await expectCase('vat-001', 'hmrc-vat-return')
+await expectCase('vat-002', 'hmrc-vat-return')
 await expectCase('ico-001', 'ico-breach-notification')
+await expectCase('ico-002', 'ico-breach-notification')
 
 await expectDocument('ad01-001', 'client-instruction')
 await expectDocument('ad01-002', 'ad01-002-client-instruction')
 await expectDocument('ad01-002', 'ad01-002-board-resolution')
 await expectDocument('ad01-002', 'ad01-002-lease-agreement')
 await expectDocument('vat-001', 'vat-client-instruction')
+await expectDocument('vat-002', 'vat-002-client-instruction')
+await expectDocument('vat-002', 'vat-002-workings-summary')
 await expectDocument('ico-001', 'ico-client-instruction')
+await expectDocument('ico-002', 'ico-002-client-instruction')
+await expectDocument('ico-002', 'ico-002-risk-assessment')
 
 await expectPage('AD01 conflicting documents task list', '/task-list?caseId=ad01-002', 'Report a problem with the evidence')
 await expectOk('AD01 portal document proxy', `${endpoints.portal}/documents/ad01-002-board-resolution?caseId=ad01-002`)
 await expectOk('AD01 portal document proxy lease', `${endpoints.portal}/documents/ad01-002-lease-agreement?caseId=ad01-002`)
+await expectOk('VAT variant portal document proxy', `${endpoints.portal}/documents/vat-002-workings-summary?caseId=vat-002`)
+await expectOk('ICO variant portal document proxy', `${endpoints.portal}/documents/ico-002-risk-assessment?caseId=ico-002`)
 await expectAuditEvent('ad01-002', 'portal.document_opened', event => event.payload.documentId === 'ad01-002-board-resolution')
 await expectAuditEvent('ad01-002', 'portal.document_opened', event => event.payload.documentId === 'ad01-002-lease-agreement')
+await expectAuditEvent('vat-002', 'portal.document_opened', event => event.payload.documentId === 'vat-002-workings-summary')
+await expectAuditEvent('ico-002', 'portal.document_opened', event => event.payload.documentId === 'ico-002-risk-assessment')
 await expectPostStatus('AD01 conflict flag', '/conflict', {
   caseId: 'ad01-002'
 }, 302)
@@ -154,6 +171,35 @@ await expectPostStatus('VAT declarations', '/vat/declarations', {
 }, 302)
 await expectPostStatus('VAT submit', '/vat/check-answers', { humanApproval: 'approved' }, 302)
 
+await expectPostStatus('VAT variant business details', withCase('/vat/business-details', 'vat-002'), {
+  caseId: 'vat-002',
+  businessName: 'Harbour Bike Repairs Ltd',
+  vatRegistrationNumber: 'GB987654321',
+  accountingPeriod: '1 April 2026 to 30 June 2026',
+  periodKey: '26A2'
+}, 302)
+await expectPostStatus('VAT variant figures', withCase('/vat/figures', 'vat-002'), {
+  caseId: 'vat-002',
+  box1: '0.00',
+  box2: '0.00',
+  box3: '0.00',
+  box4: '0.00',
+  box5: '0.00',
+  box6: '18500',
+  box7: '1200',
+  box8: '0',
+  box9: '0'
+}, 302)
+await expectPostStatus('VAT variant declarations', withCase('/vat/declarations', 'vat-002'), {
+  caseId: 'vat-002',
+  digitalRecordsChecked: 'yes',
+  figuresApproved: 'yes'
+}, 302)
+await expectPostStatus('VAT variant submit', withCase('/vat/check-answers', 'vat-002'), {
+  caseId: 'vat-002',
+  humanApproval: 'approved'
+}, 302)
+
 await expectPostStatus('ICO organisation details', '/ico/organisation-details', {
   organisationName: 'Brightwell Dental Care Ltd',
   icoRegistrationNumber: 'ZA123456',
@@ -181,17 +227,59 @@ await expectPostStatus('ICO mitigation', '/ico/mitigation', {
 }, 302)
 await expectPostStatus('ICO submit', '/ico/check-answers', { humanApproval: 'approved' }, 302)
 
+await expectPostStatus('ICO variant organisation details', withCase('/ico/organisation-details', 'ico-002'), {
+  caseId: 'ico-002',
+  organisationName: 'Riverton Library Trust',
+  icoRegistrationNumber: 'ZA654321',
+  contactName: 'Helen Morris',
+  contactEmail: 'helen.morris@rivertonlibrary.example',
+  contactPhone: '01632 960512'
+}, 302)
+await expectPostStatus('ICO variant breach details', withCase('/ico/breach-details', 'ico-002'), {
+  caseId: 'ico-002',
+  awarenessDate: '2026-05-18',
+  awarenessTime: '14:10',
+  incidentDate: '2026-05-18',
+  incidentTime: '13:35',
+  incidentSummary: 'A volunteer rota email was sent to one unintended recipient.'
+}, 302)
+await expectPostStatus('ICO variant affected data', withCase('/ico/affected-data', 'ico-002'), {
+  caseId: 'ico-002',
+  affectedIndividuals: '12',
+  dataCategories: 'Names, volunteer email addresses and weekly shift availability',
+  specialCategoryData: 'no'
+}, 302)
+await expectPostStatus('ICO variant mitigation', withCase('/ico/mitigation', 'ico-002'), {
+  caseId: 'ico-002',
+  containmentActions: 'The unintended recipient confirmed deletion and the rota mailing list was corrected.',
+  likelyRisk: 'low',
+  dataSubjectsNotified: 'no',
+  dpoContacted: 'yes'
+}, 302)
+await expectPostStatus('ICO variant submit', withCase('/ico/check-answers', 'ico-002'), {
+  caseId: 'ico-002',
+  humanApproval: 'approved'
+}, 302)
+
 const ad01AfterSubmit = await expectCase('ad01-001', 'companies-house-ad01')
 const vatAfterSubmit = await expectCase('vat-001', 'hmrc-vat-return')
+const vatVariantAfterSubmit = await expectCase('vat-002', 'hmrc-vat-return')
 const icoAfterSubmit = await expectCase('ico-001', 'ico-breach-notification')
+const icoVariantAfterSubmit = await expectCase('ico-002', 'ico-breach-notification')
 if (!ad01AfterSubmit.submissions[0]?.filingReference.startsWith('AD01-')) {
   throw new Error('AD01 submission reference was not created')
 }
 if (!vatAfterSubmit.submissions[0]?.filingReference.startsWith('VAT-')) {
   throw new Error('VAT submission reference was not created')
 }
+if (!vatVariantAfterSubmit.submissions[0]?.filingReference.startsWith('VAT-')) {
+  throw new Error('VAT variant submission reference was not created')
+}
 if (!icoAfterSubmit.submissions[0]?.filingReference.startsWith('ICO-')) {
   throw new Error('ICO submission reference was not created')
+}
+if (!icoVariantAfterSubmit.submissions[0]?.filingReference.startsWith('ICO-')) {
+  throw new Error('ICO variant submission reference was not created')
 }
 
 const unsupportedSeedResponse = await fetch(`${endpoints.crm}/__admin/reset`, {
@@ -231,5 +319,25 @@ await Promise.all(
 )
 await expectCase('ad01-002', 'companies-house-ad01')
 await expectDocument('ad01-002', 'ad01-002-client-instruction')
+
+for (const [seed, caseId, documentId, taskType] of [
+  ['vat-002', 'vat-002', 'vat-002-client-instruction', 'hmrc-vat-return'],
+  ['ico-002', 'ico-002', 'ico-002-client-instruction', 'ico-breach-notification']
+]) {
+  await Promise.all(
+    Object.entries(endpoints).map(([name, baseUrl]) =>
+      expectOk(`${name} ${seed} reset`, `${baseUrl}/__admin/reset`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-adminbench-reset-token': token
+        },
+        body: JSON.stringify({ trialId: `smoke-${seed}`, seed })
+      })
+    )
+  )
+  await expectCase(caseId, taskType)
+  await expectDocument(caseId, documentId)
+}
 
 console.log(JSON.stringify({ ok: true, endpoints }, null, 2))

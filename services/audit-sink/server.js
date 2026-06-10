@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 const port = Number(process.env.PORT || 4001)
 const resetToken = process.env.RESET_TOKEN || 'adminbench-reset-token'
-const supportedSeeds = new Set(['v0.1-default', 'ad01-default', 'ad01-002', 'vat-default', 'ico-default'])
+const supportedSeedPattern = /^(v0\.1-default|ad01-default|vat-default|ico-default|(ad01|vat|ico)-[0-9]{3})$/
 
 let events = []
 let sequence = 1
@@ -29,7 +29,7 @@ app.get('/healthz', (req, res) => {
 
 app.post('/__admin/reset', requireResetToken, (req, res) => {
   const seed = req.body.seed || 'v0.1-default'
-  if (!supportedSeeds.has(seed)) {
+  if (!supportedSeedPattern.test(seed)) {
     res.status(400).json({ ok: false, error: `Unsupported seed: ${seed}` })
     return
   }

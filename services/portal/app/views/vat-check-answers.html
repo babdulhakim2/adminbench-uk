@@ -3,7 +3,7 @@
 {% block pageTitle %}{% if errors and errors.length %}Error: {% endif %}{{ pageName }} - GOV.UK{% endblock %}
 
 {% block content %}
-  <a href="/vat/declarations" class="govuk-back-link">Back</a>
+  <a href="/vat/declarations{{ caseQuery }}" class="govuk-back-link">Back</a>
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
@@ -34,17 +34,17 @@
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key" id="vat-business-details">Business name</dt>
           <dd class="govuk-summary-list__value">{{ businessDetails.businessName or data.businessName or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details">Change<span class="govuk-visually-hidden"> business name</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> business name</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">VAT registration number</dt>
           <dd class="govuk-summary-list__value">{{ businessDetails.vatRegistrationNumber or data.vatRegistrationNumber or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details">Change<span class="govuk-visually-hidden"> VAT registration number</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> VAT registration number</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Accounting period</dt>
           <dd class="govuk-summary-list__value">{{ businessDetails.accountingPeriod or data.accountingPeriod or 'Not provided' }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details">Change<span class="govuk-visually-hidden"> accounting period</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/business-details{{ caseQuery }}">Change<span class="govuk-visually-hidden"> accounting period</span></a></dd>
         </div>
       </dl>
 
@@ -54,7 +54,7 @@
           <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">{{ box | upper }}</dt>
             <dd class="govuk-summary-list__value">{{ vatReturn[box] or data[box] or 'Not provided' }}</dd>
-            <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/figures">Change<span class="govuk-visually-hidden"> {{ box | upper }}</span></a></dd>
+            <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/figures{{ caseQuery }}">Change<span class="govuk-visually-hidden"> {{ box | upper }}</span></a></dd>
           </div>
         {% endfor %}
       </dl>
@@ -63,16 +63,17 @@
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key" id="vat-declarations">Digital records checked</dt>
           <dd class="govuk-summary-list__value">{{ declarations.digitalRecordsChecked | default(data.digitalRecordsChecked) | default('Not provided') }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/declarations">Change<span class="govuk-visually-hidden"> declaration</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/declarations{{ caseQuery }}">Change<span class="govuk-visually-hidden"> declaration</span></a></dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Ready for human approval</dt>
           <dd class="govuk-summary-list__value">{{ declarations.figuresApproved | default(data.figuresApproved) | default('Not provided') }}</dd>
-          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/declarations">Change<span class="govuk-visually-hidden"> approval declaration</span></a></dd>
+          <dd class="govuk-summary-list__actions"><a class="govuk-link" href="/vat/declarations{{ caseQuery }}">Change<span class="govuk-visually-hidden"> approval declaration</span></a></dd>
         </div>
       </dl>
 
       <form method="post" novalidate>
+        <input type="hidden" name="caseId" value="{{ caseId }}">
         <div class="govuk-form-group{% if errors | selectattr('href', 'equalto', '#humanApproval') | list | length %} govuk-form-group--error{% endif %}">
           <fieldset class="govuk-fieldset" id="humanApproval" aria-describedby="humanApproval-hint">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Human approval</legend>
