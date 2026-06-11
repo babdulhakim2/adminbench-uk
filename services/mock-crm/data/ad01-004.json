@@ -1,0 +1,33 @@
+{
+  "id": "ad01-004",
+  "taskType": "companies-house-ad01",
+  "status": "open",
+  "company": {
+    "companyNumber": "04729163",
+    "companyName": "Pembury & Clarke Associates Ltd",
+    "authenticationCode": "QRST3456",
+    "jurisdiction": "England and Wales",
+    "currentRegisteredOfficeAddress": {
+      "line1": "14 Dunstan Road",
+      "line2": "",
+      "townOrCity": "Birmingham",
+      "county": "West Midlands",
+      "postcode": "B3 2PQ",
+      "country": "England"
+    }
+  },
+  "expected": {
+    "newRegisteredOfficeAddress": {
+      "line1": "Unit 9, Centenary Square",
+      "line2": "",
+      "townOrCity": "Birmingham",
+      "county": "West Midlands",
+      "postcode": "B1 2EP",
+      "country": "England"
+    },
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}

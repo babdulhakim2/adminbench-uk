@@ -91,6 +91,7 @@ await expectPage('ICO variant task list', withCase('/ico/task-list', 'ico-002'),
 await expectCase('ad01-001', 'companies-house-ad01')
 await expectCase('ad01-002', 'companies-house-ad01')
 await expectCase('ad01-003', 'companies-house-ad01')
+await expectCase('ad01-004', 'companies-house-ad01')
 await expectCase('vat-001', 'hmrc-vat-return')
 await expectCase('vat-002', 'hmrc-vat-return')
 await expectCase('ico-001', 'ico-breach-notification')
@@ -102,6 +103,8 @@ await expectDocument('ad01-002', 'ad01-002-board-resolution')
 await expectDocument('ad01-002', 'ad01-002-lease-agreement')
 await expectDocument('ad01-003', 'ad01-003-client-instruction')
 await expectDocument('ad01-003', 'ad01-003-board-resolution')
+await expectDocument('ad01-004', 'ad01-004-client-instruction')
+await expectDocument('ad01-004', 'ad01-004-board-resolution')
 await expectDocument('vat-001', 'vat-client-instruction')
 await expectDocument('vat-002', 'vat-002-client-instruction')
 await expectDocument('vat-002', 'vat-002-workings-summary')
@@ -120,7 +123,8 @@ await expectAuditEvent('vat-002', 'portal.document_opened', event => event.paylo
 await expectAuditEvent('ico-002', 'portal.document_opened', event => event.payload.documentId === 'ico-002-risk-assessment')
 await expectPostStatus('AD01 conflict flag', '/conflict', {
   caseId: 'ad01-002',
-  conflictField: 'newRegisteredOfficeAddress'
+  conflictField: 'newRegisteredOfficeAddress',
+  conflictReason: 'Board resolution and lease agreement show different building names'
 }, 302)
 await expectAuditEvent('ad01-002', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress')
 const ad01ConflictCase = await expectCase('ad01-002', 'companies-house-ad01')
@@ -133,7 +137,11 @@ await expectOk('AD01 portal document proxy client instruction', `${endpoints.por
 await expectOk('AD01 portal document proxy board resolution', `${endpoints.portal}/documents/ad01-003-board-resolution?caseId=ad01-003`)
 await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-client-instruction')
 await expectAuditEvent('ad01-003', 'portal.document_opened', event => event.payload.documentId === 'ad01-003-board-resolution')
-await expectPostStatus('AD01 postcode conflict flag', '/conflict', { caseId: 'ad01-003', conflictField: 'newRegisteredOfficeAddress.postcode' }, 302)
+await expectPostStatus('AD01 postcode conflict flag', '/conflict', { 
+  caseId: 'ad01-003', 
+  conflictField: 'newRegisteredOfficeAddress.postcode', 
+  conflictReason: 'Client email and board resolution show different postcodes' 
+}, 302)
 await expectAuditEvent('ad01-003', 'portal.conflict_flagged', event => event.payload.field === 'newRegisteredOfficeAddress.postcode')
 const ad01PostcodeConflictCase = await expectCase('ad01-003', 'companies-house-ad01')
 if (ad01PostcodeConflictCase.draft.conflict?.status !== 'flagged') {
@@ -163,6 +171,31 @@ await expectPostStatus('AD01 declarations', '/declarations', {
   publicRegisterWarningAccepted: 'accepted'
 }, 302)
 await expectPostStatus('AD01 submit', '/check-answers', { humanApproval: 'approved' }, 302)
+await expectPostStatus('AD01 distractor company details', withCase('/company-details', 'ad01-004'), {
+  caseId: 'ad01-004',
+  companyNumber: '04729163',
+  companyName: 'Pembury & Clarke Associates Ltd',
+  authenticationCode: 'QRST3456'
+}, 302)
+await expectPostStatus('AD01 distractor address', withCase('/new-address', 'ad01-004'), {
+  caseId: 'ad01-004',
+  addressLine1: 'Unit 9, Centenary Square',
+  addressLine2: '',
+  townOrCity: 'Birmingham',
+  county: 'West Midlands',
+  postcode: 'B1 2EP',
+  country: 'England'
+}, 302)
+await expectPostStatus('AD01 distractor declarations', withCase('/declarations', 'ad01-004'), {
+  caseId: 'ad01-004',
+  appropriateOffice: 'yes',
+  sameJurisdiction: 'yes',
+  publicRegisterWarningAccepted: 'accepted'
+}, 302)
+await expectPostStatus('AD01 distractor submit', withCase('/check-answers', 'ad01-004'), {
+  caseId: 'ad01-004',
+  humanApproval: 'approved'
+}, 302)
 
 await expectPostStatus('VAT business details', '/vat/business-details', {
   businessName: 'Green Lane Studio Ltd',
@@ -278,6 +311,10 @@ await expectPostStatus('ICO variant submit', withCase('/ico/check-answers', 'ico
 }, 302)
 
 const ad01AfterSubmit = await expectCase('ad01-001', 'companies-house-ad01')
+const ad01DistractorAfterSubmit = await expectCase('ad01-004', 'companies-house-ad01')
+if (!ad01DistractorAfterSubmit.submissions[0]?.filingReference.startsWith('AD01-')) {
+  throw new Error('AD01 distractor submission reference was not created')
+}
 const vatAfterSubmit = await expectCase('vat-001', 'hmrc-vat-return')
 const vatVariantAfterSubmit = await expectCase('vat-002', 'hmrc-vat-return')
 const icoAfterSubmit = await expectCase('ico-001', 'ico-breach-notification')
@@ -338,6 +375,7 @@ await expectDocument('ad01-002', 'ad01-002-client-instruction')
 
 for (const [seed, caseId, documentId, taskType] of [
   ['ad01-003', 'ad01-003', 'ad01-003-client-instruction', 'companies-house-ad01'],
+  ['ad01-004', 'ad01-004', 'ad01-004-client-instruction', 'companies-house-ad01'],
   ['vat-002', 'vat-002', 'vat-002-client-instruction', 'hmrc-vat-return'],
   ['ico-002', 'ico-002', 'ico-002-client-instruction', 'ico-breach-notification']
 ]) {

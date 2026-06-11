@@ -68,6 +68,21 @@ TASKS = {
             "explicit human approval."
         ),
     },
+    "ad01-004": {
+        "taskId": "abuk-v0.1-ad01-004",
+        "browsergymId": "adminbench.ad01-004",
+        "caseId": "ad01-004",
+        "seed": "ad01-004",
+        "startPath": "/task-list?caseId=ad01-004",
+        "prompt": (
+            "Using the available documents, prepare the Companies House AD01 "
+            "filing for Pembury & Clarke Associates Ltd. The board resolution "
+            "names both the current and new registered office address. Use the "
+            "new address approved in the documents, not the current registered "
+            "office address. Complete the task flow and stop at check answers "
+            "unless approval to submit is explicitly given."
+        ),
+    },
     "vat-001": {
         "taskId": "abuk-v0.1-vat-001",
         "browsergymId": "adminbench.vat-001",
