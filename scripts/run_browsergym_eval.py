@@ -376,6 +376,41 @@ def scripted_ad01_003(page: Any, portal_url: str) -> list[dict[str, Any]]:
     steps.append({"kind": "scripted", "action": "flag postcode conflict"})
     return steps
 
+def scripted_ad01_004(page: Any) -> list[dict[str, Any]]:
+    steps = []
+    page.get_by_role("link", name="Company details").click()
+    fill_fields(
+        page,
+        {
+            "#companyNumber": "04729163",
+            "#companyName": "Pembury & Clarke Associates Ltd",
+            "#authenticationCode": "QRST3456",
+        },
+    )
+    click_save(page)
+    steps.append({"kind": "scripted", "action": "complete company details"})
+
+    fill_fields(
+        page,
+        {
+            "#addressLine1": "Unit 9, Centenary Square",
+            "#addressLine2": "",
+            "#townOrCity": "Birmingham",
+            "#county": "West Midlands",
+            "#postcode": "B1 2EP",
+        },
+    )
+    page.select_option("#country", "England")
+    click_save(page)
+    steps.append({"kind": "scripted", "action": "complete registered office address"})
+
+    page.check("#appropriateOffice-yes")
+    page.check("#sameJurisdiction-yes")
+    page.check("#publicRegisterWarningAccepted")
+    click_save(page)
+    steps.append({"kind": "scripted", "action": "complete declarations"})
+    return steps    
+
 VAT_SCRIPTED_VALUES = {
     "vat-001": {
         "business": {
@@ -524,6 +559,8 @@ def run_scripted_agent(case_id: str, page: Any, portal_url: str, max_steps: int)
         steps = scripted_ad01_002(page, portal_url)
     elif case_id == "ad01-003":
         steps = scripted_ad01_003(page, portal_url)
+    elif case_id == "ad01-004":
+        steps = scripted_ad01_004(page)
     elif case_id in VAT_SCRIPTED_VALUES:
         steps = scripted_vat(case_id, page)
     elif case_id in ICO_SCRIPTED_VALUES:

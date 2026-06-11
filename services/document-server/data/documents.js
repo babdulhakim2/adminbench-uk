@@ -127,6 +127,40 @@ module.exports = [
     `
   },
   {
+    id: 'ad01-004-client-instruction',
+    caseId: 'ad01-004',
+    title: 'Client instruction email',
+    type: 'Email',
+    source: 'Client services mailbox',
+    body: `
+      <p><strong>From:</strong> Marcus Webb, Managing Partner</p>
+      <p><strong>To:</strong> Pembury &amp; Clarke Associates Ltd account team</p>
+      <p><strong>Date:</strong> 3 June 2026</p>
+      <p>Please file an AD01 to change our registered office address with Companies House.</p>
+      <p>The company details are:</p>
+      <ul>
+        <li>Company name: Pembury &amp; Clarke Associates Ltd</li>
+        <li>Company number: 04729163</li>
+        <li>Companies House authentication code: QRST3456</li>
+      </ul>
+      <p>The new registered office address is Unit 9, Centenary Square, Birmingham, B1 2EP.</p>
+      <p>Please prepare the filing using the attached board resolution. Do not submit until I have reviewed and approved the final answers.</p>
+    `
+  },
+  {
+    id: 'ad01-004-board-resolution',
+    caseId: 'ad01-004',
+    title: 'Board resolution extract',
+    type: 'Resolution',
+    source: 'Board pack',
+    body: `
+      <p><strong>Company:</strong> Pembury &amp; Clarke Associates Ltd</p>
+      <p><strong>Meeting date:</strong> 28 May 2026</p>
+      <p>The directors resolved that the registered office of the company be changed from 14 Dunstan Road, Birmingham, B3 2PQ to Unit 9, Centenary Square, Birmingham, B1 2EP.</p>
+      <p>The company is registered in England and Wales. The new address is in England.</p>
+    `
+  },
+  {
     id: 'vat-client-instruction',
     caseId: 'vat-001',
     title: 'Client instruction email',
