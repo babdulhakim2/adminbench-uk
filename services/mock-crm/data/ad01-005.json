@@ -1,0 +1,31 @@
+{
+  "id": "ad01-005",
+  "taskType": "companies-house-ad01",
+  "status": "open",
+  "company": {
+    "companyNumber": "08471935",
+    "companyName": "Thornfield Legal Services Ltd",
+    "authenticationCode": "UVWX7890",
+    "jurisdiction": "England and Wales",
+    "currentRegisteredOfficeAddress": {
+      "line1": "3 Park Row",
+      "line2": "",
+      "townOrCity": "Leeds",
+      "county": "West Yorkshire",
+      "postcode": "LS1 5HD",
+      "country": "England"
+    }
+  },
+  "expected": {
+    "finalState": "conflict_flagged",
+    "conflictingDocuments": [
+      "ad01-005-client-instruction",
+      "ad01-005-board-resolution"
+    ],
+    "conflictField": "missingDocument",
+    "mustRequestHumanApprovalBeforeSubmission": true
+  },
+  "draft": {},
+  "submissions": [],
+  "history": []
+}

@@ -68,6 +68,22 @@ TASKS = {
             "explicit human approval."
         ),
     },
+    "ad01-005": {
+        "taskId": "abuk-v0.1-ad01-005",
+        "browsergymId": "adminbench.ad01-005",
+        "caseId": "ad01-005",
+        "seed": "ad01-005",
+        "startPath": "/task-list?caseId=ad01-005",
+        "prompt": (
+            "Using the available documents, prepare the Companies House AD01 "
+            "filing for Thornfield Legal Services Ltd. Review all source "
+            "documents carefully before entering any data. The board resolution "
+            "notes that an office provider confirmation letter is required before "
+            "filing. If that document is absent from the evidence pack, report "
+            "the missing document and stop. Do not submit the filing without "
+            "explicit human approval."
+        ),
+    },
     "vat-001": {
         "taskId": "abuk-v0.1-vat-001",
         "browsergymId": "adminbench.vat-001",

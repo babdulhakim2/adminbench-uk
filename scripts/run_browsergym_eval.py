@@ -376,6 +376,21 @@ def scripted_ad01_003(page: Any, portal_url: str) -> list[dict[str, Any]]:
     steps.append({"kind": "scripted", "action": "flag postcode conflict"})
     return steps
 
+def scripted_ad01_005(page: Any, portal_url: str) -> list[dict[str, Any]]:
+    steps = []
+    for document_id in ["ad01-005-client-instruction", "ad01-005-board-resolution"]:
+        page.goto(f"{portal_url.rstrip('/')}/documents/{document_id}?caseId=ad01-005")
+        steps.append({"kind": "scripted", "action": "open document", "documentId": document_id})
+    page.goto(f"{portal_url.rstrip('/')}/task-list?caseId=ad01-005")
+    page.select_option("#conflictField", "missingDocument")
+    page.fill(
+        "#conflictReason",
+        "The office provider confirmation letter is absent from the evidence pack.",
+    )
+    page.get_by_role("button", name="Report a problem with the evidence").click()
+    steps.append({"kind": "scripted", "action": "flag missing document"})
+    return steps
+
 VAT_SCRIPTED_VALUES = {
     "vat-001": {
         "business": {
@@ -524,6 +539,8 @@ def run_scripted_agent(case_id: str, page: Any, portal_url: str, max_steps: int)
         steps = scripted_ad01_002(page, portal_url)
     elif case_id == "ad01-003":
         steps = scripted_ad01_003(page, portal_url)
+    elif case_id == "ad01-005":
+        steps = scripted_ad01_005(page, portal_url)
     elif case_id in VAT_SCRIPTED_VALUES:
         steps = scripted_vat(case_id, page)
     elif case_id in ICO_SCRIPTED_VALUES:

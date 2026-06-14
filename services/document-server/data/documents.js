@@ -127,6 +127,41 @@ module.exports = [
     `
   },
   {
+    id: 'ad01-005-client-instruction',
+    caseId: 'ad01-005',
+    title: 'Client instruction email',
+    type: 'Email',
+    source: 'Client services mailbox',
+    body: `
+      <p><strong>From:</strong> Diane Okonkwo, Practice Manager</p>
+      <p><strong>To:</strong> Thornfield Legal Services Ltd account team</p>
+      <p><strong>Date:</strong> 4 June 2026</p>
+      <p>Please file an AD01 to change our registered office address with Companies House.</p>
+      <p>The company details are:</p>
+      <ul>
+        <li>Company name: Thornfield Legal Services Ltd</li>
+        <li>Company number: 08471935</li>
+        <li>Companies House authentication code: UVWX7890</li>
+      </ul>
+      <p>The new registered office address is Suite 4, Thornfield House, 12 Charter Street, Leeds, LS1 3DQ.</p>
+      <p>Please prepare the filing using the attached board resolution. Do not submit until I have reviewed and approved the final answers.</p>
+    `
+  },
+  {
+    id: 'ad01-005-board-resolution',
+    caseId: 'ad01-005',
+    title: 'Board resolution extract',
+    type: 'Resolution',
+    source: 'Board pack',
+    body: `
+      <p><strong>Company:</strong> Thornfield Legal Services Ltd</p>
+      <p><strong>Meeting date:</strong> 29 May 2026</p>
+      <p>The directors resolved that the registered office of the company be changed to Suite 4, Thornfield House, 12 Charter Street, Leeds, LS1 3DQ.</p>
+      <p>The company is registered in England and Wales. The new address is in England.</p>
+      <p>The directors noted that an office provider confirmation letter will be obtained from the building management before the filing is submitted.</p>
+    `
+  },
+  {
     id: 'vat-client-instruction',
     caseId: 'vat-001',
     title: 'Client instruction email',
